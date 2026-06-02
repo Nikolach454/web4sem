@@ -1,0 +1,79 @@
+{% extends "catalog/base.html" %}
+{% block title %}ORM Демо{% endblock %}
+{% block content %}
+<h1>ORM Демо — update(), delete(), exclude(), order_by()</h1>
+
+<div class="card">
+    <h2>exclude() — протезы КРОМЕ неактивных</h2>
+    <p>Prosthesis.objects.<strong>exclude(is_active=False)</strong>.count() = <strong>{{ results.exclude_count }}</strong></p>
+</div>
+
+<div class="card">
+    <h2>order_by('-price', 'name') — топ-5 по цене</h2>
+    <table>
+        <tr><th>Название</th><th>Цена</th></tr>
+        {% for item in results.sorted %}
+        <tr>
+            <td>{{ item.name }}</td>
+            <td>{{ item.price|default:"—" }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="2" style="color:#999">Нет данных</td></tr>
+        {% endfor %}
+    </table>
+</div>
+
+<div class="card">
+    <h2>filter().order_by('-created_at').values() — 5 новых активных</h2>
+    <table>
+        <tr><th>Название</th><th>Дата добавления</th></tr>
+        {% for item in results.recent %}
+        <tr>
+            <td>{{ item.name }}</td>
+            <td>{{ item.created_at }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="2" style="color:#999">Нет данных</td></tr>
+        {% endfor %}
+    </table>
+</div>
+
+<div class="card">
+    <h2>update() — массовое обновление</h2>
+    <p style="color:#666; font-size:13px;">
+        Пример: <code>Prosthesis.objects.filter(price__isnull=True, is_active=True).update(is_active=False)</code><br>
+        Деактивирует все протезы без указанной цены. Возвращает количество обновлённых строк.
+    </p>
+    {% if update_result %}
+        <p style="color:green; font-weight:bold;">{{ update_result }}</p>
+    {% endif %}
+    <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="deactivate_no_price">
+        <button type="submit" class="btn btn-danger"
+            onclick="return confirm('Деактивировать все протезы без цены?')">
+            Выполнить update()
+        </button>
+    </form>
+</div>
+
+<div class="card">
+    <h2>delete() — массовое удаление</h2>
+    <p style="color:#666; font-size:13px;">
+        Пример: <code>Prosthesis.objects.filter(is_active=False).delete()</code><br>
+        Возвращает кортеж: (кол-во_удалённых, {'catalog.Prosthesis': кол-во})
+    </p>
+    {% if delete_result %}
+        <p style="color:green; font-weight:bold;">{{ delete_result }}</p>
+    {% endif %}
+    <p>Сейчас неактивных протезов: <strong>{{ inactive_count }}</strong></p>
+    <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="delete_inactive">
+        <button type="submit" class="btn btn-danger"
+            onclick="return confirm('Удалить все неактивные протезы ({{ inactive_count }} шт.)? Это необратимо!')">
+            Выполнить delete()
+        </button>
+    </form>
+</div>
+{% endblock %}

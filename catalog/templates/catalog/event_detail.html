@@ -1,0 +1,19 @@
+{% extends "catalog/base.html" %}
+{% block title %}{{ event.title }}{% endblock %}
+{% block content %}
+<h1>{{ event.title }}</h1>
+<div class="card">
+    <p><strong>Дата:</strong> {{ event.event_date|date:"d.m.Y H:i" }}</p>
+    <p><strong>Место:</strong> {{ event.location|default:"—" }}</p>
+    <p><strong>Организатор:</strong> {{ event.author|default:"—" }}</p>
+    {% if event.website %}
+        {# URLField — хранит валидный URL #}
+        <p><strong>Сайт (URLField):</strong> <a href="{{ event.website }}" target="_blank">{{ event.website }}</a></p>
+    {% endif %}
+    {% if event.image %}
+        <img src="{{ event.image.url }}" style="max-height:200px; border-radius:6px; margin-bottom:12px;">
+    {% endif %}
+    <div>{{ event.description|linebreaks }}</div>
+</div>
+<a href="javascript:history.back()" class="btn btn-secondary">← Назад</a>
+{% endblock %}

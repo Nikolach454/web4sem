@@ -1,0 +1,116 @@
+{% extends "catalog/base.html" %}
+{% block title %}Статистика{% endblock %}
+{% block content %}
+<h1>Статистика (агрегации и аннотации)</h1>
+
+{# aggregate() — одно значение по всему QuerySet #}
+<div class="card">
+    <h2>aggregate() — итоговые показатели по ценам</h2>
+    <table>
+        <tr><th>Показатель</th><th>Значение</th></tr>
+        <tr><td>Средняя цена (Avg)</td><td>{{ price_stats.avg_price|floatformat:2|default:"—" }} руб.</td></tr>
+        <tr><td>Максимальная цена (Max)</td><td>{{ price_stats.max_price|default:"—" }} руб.</td></tr>
+        <tr><td>Минимальная цена (Min)</td><td>{{ price_stats.min_price|default:"—" }} руб.</td></tr>
+        <tr><td>Сумма всех цен (Sum)</td><td>{{ price_stats.total_price|default:"—" }} руб.</td></tr>
+        <tr><td>Всего протезов (Count)</td><td>{{ price_stats.total_count }}</td></tr>
+    </table>
+</div>
+
+{# annotate() — пример 1: количество протезов по типам #}
+<div class="card">
+    <h2>annotate() — Пример 1: протезов по типу</h2>
+    <table>
+        <tr><th>Тип протеза</th><th>Количество (annotate Count)</th></tr>
+        {% for t in types_with_count %}
+        <tr>
+            <td>{{ t.name }}</td>
+            <td>{{ t.prosthesis_count }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="2" style="color:#999">Нет данных</td></tr>
+        {% endfor %}
+    </table>
+</div>
+
+{# annotate() — пример 2: количество заявок по протезу #}
+<div class="card">
+    <h2>annotate() — Пример 2: заявок на протез (топ 10)</h2>
+    <table>
+        <tr><th>Протез</th><th>Заявок (annotate Count)</th></tr>
+        {% for p in prostheses_with_requests %}
+        <tr>
+            <td><a href="{{ p.get_absolute_url }}">{{ p.name }}</a></td>
+            <td>{{ p.request_count }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="2" style="color:#999">Нет данных</td></tr>
+        {% endfor %}
+    </table>
+</div>
+
+{# annotate() — пример 3: количество статей у пользователя #}
+<div class="card">
+    <h2>annotate() — Пример 3: статей у пользователя</h2>
+    <table>
+        <tr><th>Пользователь</th><th>Статей блога (annotate Count)</th></tr>
+        {% for u in users_with_posts %}
+        <tr>
+            <td>{{ u.full_name }}</td>
+            <td>{{ u.post_count }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="2" style="color:#999">Нет данных</td></tr>
+        {% endfor %}
+    </table>
+</div>
+
+{# values() и values_list() #}
+<div class="card">
+    <h2>values() — словари (name + price)</h2>
+    <pre style="background:#f8f8f8;padding:12px;border-radius:4px;font-size:12px;">{% for item in prosthesis_values %}{{ item }}
+{% endfor %}</pre>
+
+    <h2>values_list('name', flat=True)</h2>
+    <p>{{ prosthesis_names|join:" | " }}</p>
+
+    <h2>values_list('name', 'price')</h2>
+    <pre style="background:#f8f8f8;padding:12px;border-radius:4px;font-size:12px;">{% for item in type_name_price %}{{ item }}
+{% endfor %}</pre>
+</div>
+
+{# count() и exists() #}
+<div class="card">
+    <h2>count() и exists()</h2>
+    <p><strong>active.count():</strong> {{ active_count }} активных протезов</p>
+    <p><strong>filter(price__gte=100000).exists():</strong>
+        {% if has_expensive %}
+            <span style="color:green">True — есть протезы дороже 100 000 руб.</span>
+        {% else %}
+            <span style="color:#e74c3c">False — нет протезов дороже 100 000 руб.</span>
+        {% endif %}
+    </p>
+</div>
+
+{# prefetch_related: пользователи + роли #}
+<div class="card">
+    <h2>prefetch_related('roles') — пользователи с ролями</h2>
+    <table>
+        <tr><th>Пользователь</th><th>Роли (M2M через prefetch_related)</th></tr>
+        {% for u in users %}
+        <tr>
+            <td>{{ u.full_name }}</td>
+            <td>
+                {# roles уже предзагружены — без доп. SQL-запросов #}
+                {% for role in u.roles.all %}
+                    <span class="badge badge-blue">{{ role.name }}</span>
+                {% empty %}
+                    <span style="color:#999">нет ролей</span>
+                {% endfor %}
+            </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="2" style="color:#999">Нет пользователей</td></tr>
+        {% endfor %}
+    </table>
+</div>
+{% endblock %}

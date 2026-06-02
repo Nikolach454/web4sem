@@ -1,0 +1,21 @@
+{% extends "catalog/base.html" %}
+{% block title %}Новая заявка{% endblock %}
+{% block content %}
+<h1>Новая заявка</h1>
+<div class="card">
+<form method="post">
+    {% csrf_token %}
+    {% for field in form %}
+        <div class="form-group">
+            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {{ field }}
+            {% if field.errors %}
+                <div style="color:red; font-size:12px;">{{ field.errors }}</div>
+            {% endif %}
+        </div>
+    {% endfor %}
+    <button type="submit" class="btn btn-primary">Отправить заявку</button>
+    <a href="{% url 'catalog:request_list' %}" class="btn btn-secondary">Отмена</a>
+</form>
+</div>
+{% endblock %}

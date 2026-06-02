@@ -1,0 +1,15 @@
+{% extends "catalog/base.html" %}
+{% block title %}Удалить {{ prosthesis.name }}{% endblock %}
+{% block content %}
+<h1>Удалить протез?</h1>
+<div class="card">
+    <p>Вы уверены, что хотите удалить <strong>«{{ prosthesis }}»</strong>?</p>
+    <p style="color:#999; font-size:13px;">Это действие нельзя отменить.</p>
+    <form method="post">
+        {% csrf_token %}
+        {# После удаления — redirect на prosthesis_list (Часть 3) #}
+        <button type="submit" class="btn btn-danger">Да, удалить</button>
+        <a href="{{ prosthesis.get_absolute_url }}" class="btn btn-secondary">Отмена</a>
+    </form>
+</div>
+{% endblock %}

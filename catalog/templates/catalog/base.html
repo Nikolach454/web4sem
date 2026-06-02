@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Каталог протезов{% endblock %}</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #f5f5f5; }
+        nav { background: #2c3e50; padding: 12px 24px; }
+        nav a { color: #ecf0f1; text-decoration: none; margin-right: 16px; font-size: 14px; }
+        nav a:hover { color: #3498db; }
+        .container { max-width: 1100px; margin: 24px auto; padding: 0 16px; }
+        h1, h2 { color: #2c3e50; }
+        .card { background: #fff; border-radius: 6px; padding: 20px; margin-bottom: 16px; box-shadow: 0 1px 4px rgba(0,0,0,.1); }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { text-align: left; padding: 8px 12px; border-bottom: 1px solid #eee; }
+        th { background: #ecf0f1; font-weight: bold; }
+        tr:hover { background: #fafafa; }
+        .btn { display: inline-block; padding: 7px 16px; border-radius: 4px; text-decoration: none; font-size: 13px; cursor: pointer; border: none; }
+        .btn-primary { background: #3498db; color: #fff; }
+        .btn-danger  { background: #e74c3c; color: #fff; }
+        .btn-secondary { background: #95a5a6; color: #fff; }
+        .btn:hover { opacity: .85; }
+        input[type=text], input[type=email], select, textarea {
+            padding: 6px 10px; border: 1px solid #ccc; border-radius: 4px; width: 100%; box-sizing: border-box; margin-top: 4px;
+        }
+        .form-group { margin-bottom: 14px; }
+        label { font-weight: bold; font-size: 13px; }
+        .badge { display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: 12px; color: #fff; }
+        .badge-blue { background: #3498db; }
+        .badge-green { background: #2ecc71; }
+        .messages { list-style: none; padding: 0; }
+        .messages li { padding: 10px; margin-bottom: 8px; border-radius: 4px; background: #d4edda; color: #155724; }
+    </style>
+</head>
+<body>
+<nav>
+    <a href="{% url 'catalog:prosthesis_list' %}">Протезы</a>
+    <a href="{% url 'catalog:request_list' %}">Заявки</a>
+    <a href="{% url 'catalog:stats' %}">Статистика</a>
+    <a href="{% url 'catalog:orm_demo' %}">ORM Демо</a>
+    <a href="/admin/">Админка</a>
+</nav>
+<div class="container">
+    {% block content %}{% endblock %}
+</div>
+</body>
+</html>

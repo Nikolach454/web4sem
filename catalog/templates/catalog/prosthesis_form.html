@@ -1,0 +1,26 @@
+{% extends "catalog/base.html" %}
+{% block title %}{{ action }} протез{% endblock %}
+{% block content %}
+<h1>{{ action }} протез</h1>
+
+{# Демонстрация: CRUD-форма с ImageField (enctype multipart/form-data обязателен!) #}
+<div class="card">
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {% for field in form %}
+        <div class="form-group">
+            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {{ field }}
+            {% if field.errors %}
+                <div style="color:red; font-size:12px;">{{ field.errors }}</div>
+            {% endif %}
+            {% if field.help_text %}
+                <div style="color:#999; font-size:12px;">{{ field.help_text }}</div>
+            {% endif %}
+        </div>
+    {% endfor %}
+    <button type="submit" class="btn btn-primary">Сохранить</button>
+    <a href="{% url 'catalog:prosthesis_list' %}" class="btn btn-secondary">Отмена</a>
+</form>
+</div>
+{% endblock %}

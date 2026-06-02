@@ -1,0 +1,102 @@
+{% extends "catalog/base.html" %}
+{% block title %}Протезы{% endblock %}
+{% block content %}
+<h1>Каталог протезов</h1>
+
+{# Демонстрация: filter, __icontains, __contains, order_by, exclude, кастомный менеджер #}
+<div class="card">
+    <form method="get">
+        <div style="display:flex; gap:12px; flex-wrap:wrap; align-items:flex-end;">
+            <div>
+                <label>Поиск (__icontains):</label>
+                <input type="text" name="q" value="{{ search }}" placeholder="название или тип...">
+            </div>
+            <div>
+                <label>Тип:</label>
+                <select name="type">
+                    <option value="">Все типы</option>
+                    {% for t in types %}
+                    {# related_name в действии: каждый тип — объект ProsthesisType #}
+                    <option value="{{ t.id }}">{{ t.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label>Сортировка (order_by):</label>
+                <select name="sort">
+                    <option value="name">По названию А-Я</option>
+                    <option value="-name">По названию Я-А</option>
+                    <option value="price">По цене ↑</option>
+                    <option value="-price">По цене ↓</option>
+                    <option value="-created_at">Сначала новые</option>
+                </select>
+            </div>
+            <div>
+                <label>
+                    <input type="checkbox" name="hide_no_price" {% if request.GET.hide_no_price %}checked{% endif %}>
+                    Скрыть без цены (exclude)
+                </label>
+            </div>
+            <button type="submit" class="btn btn-primary">Применить</button>
+            <a href="{% url 'catalog:prosthesis_list' %}" class="btn btn-secondary">Сбросить</a>
+        </div>
+    </form>
+</div>
+
+{# count() и exists() #}
+<p>
+    Найдено: <strong>{{ total_count }}</strong> протезов.
+    {% if has_results %}
+        <span style="color:green">✔ Результаты есть (exists=True)</span>
+    {% else %}
+        <span style="color:red">✘ Ничего не найдено (exists=False)</span>
+    {% endif %}
+    <a href="{% url 'catalog:prosthesis_create' %}" class="btn btn-primary" style="float:right">+ Добавить протез</a>
+</p>
+
+<div class="card">
+<table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Название</th>
+            <th>Тип (related_name)</th>
+            <th>Цена</th>
+            <th>Фото</th>
+            <th>Дата добавления</th>
+            <th>Действия</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for p in prostheses %}
+        <tr>
+            <td>{{ p.id }}</td>
+            {# get_absolute_url — ссылка формируется через reverse в модели #}
+            <td><a href="{{ p.get_absolute_url }}">{{ p.name }}</a></td>
+            {# select_related: p.prosthesis_type — уже загружен JOIN'ом, без доп. запроса #}
+            <td>{{ p.prosthesis_type.name }}</td>
+            <td>{% if p.price %}{{ p.price }} руб.{% else %}—{% endif %}</td>
+            <td>
+                {% if p.image %}
+                    <img src="{{ p.image.url }}" style="height:40px;border-radius:3px;">
+                {% else %}—{% endif %}
+            </td>
+            <td>{{ p.created_at|date:"d.m.Y" }}</td>
+            <td>
+                <a href="{% url 'catalog:prosthesis_edit' p.pk %}" class="btn btn-secondary">Ред.</a>
+                <a href="{% url 'catalog:prosthesis_delete' p.pk %}" class="btn btn-danger">Удал.</a>
+            </td>
+        </tr>
+    {% empty %}
+        <tr><td colspan="7" style="text-align:center;color:#999">Ничего не найдено</td></tr>
+    {% endfor %}
+    </tbody>
+</table>
+</div>
+
+{# values_list() #}
+<div class="card">
+    <h3>values_list('name', flat=True) — список названий:</h3>
+    <p style="color:#666; font-size:13px;">{{ name_hints|join:", " }}</p>
+</div>
+{% endblock %}

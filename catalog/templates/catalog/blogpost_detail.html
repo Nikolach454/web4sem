@@ -1,0 +1,15 @@
+{% extends "catalog/base.html" %}
+{% block title %}{{ post.title }}{% endblock %}
+{% block content %}
+<h1>{{ post.title }}</h1>
+<div class="card">
+    <p><strong>Автор:</strong> {{ post.author|default:"—" }}</p>
+    <p><strong>Опубликована:</strong> {% if post.is_published %}Да{% else %}Нет{% endif %}</p>
+    <p><strong>Дата публикации:</strong> {{ post.published_at|date:"d.m.Y H:i"|default:"—" }}</p>
+    {% if post.image %}
+        <img src="{{ post.image.url }}" style="max-height:200px; border-radius:6px; margin-bottom:12px;">
+    {% endif %}
+    <div>{{ post.content|linebreaks }}</div>
+</div>
+<a href="javascript:history.back()" class="btn btn-secondary">← Назад</a>
+{% endblock %}

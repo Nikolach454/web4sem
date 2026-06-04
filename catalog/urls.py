@@ -25,11 +25,14 @@ URL-маршруты приложения catalog.
 """
 
 from django.urls import path, re_path
+from django.views.generic import RedirectView
 from . import views
 
 app_name = 'catalog'
 
 urlpatterns = [
+    path('', RedirectView.as_view(pattern_name='catalog:prosthesis_list')),
+
     # ── Протезы ────────────────────────────────────────────────────────
     path('prostheses/', views.prosthesis_list, name='prosthesis_list'),
 
@@ -54,8 +57,15 @@ urlpatterns = [
     path('stats/', views.stats, name='stats'),
     path('orm-demo/', views.orm_demo, name='orm_demo'),
 
-    # ── Дополнительные детальные страницы ──────────────────────────────
+    # ── Блог ────────────────────────────────────────────────────────────
+    path('blog/', views.blogpost_list, name='blogpost_list'),
     path('blog/<int:pk>/', views.blogpost_detail, name='blogpost_detail'),
+
+    # ── Мероприятия ─────────────────────────────────────────────────────
+    path('events/', views.event_list, name='event_list'),
     path('events/<int:pk>/', views.event_detail, name='event_detail'),
+
+    # ── Документы ───────────────────────────────────────────────────────
+    path('documents/', views.document_list, name='document_list'),
     path('documents/<int:pk>/', views.document_detail, name='document_detail'),
 ]

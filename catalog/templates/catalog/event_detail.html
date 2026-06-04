@@ -7,8 +7,7 @@
     <p><strong>Место:</strong> {{ event.location|default:"—" }}</p>
     <p><strong>Организатор:</strong> {{ event.author|default:"—" }}</p>
     {% if event.website %}
-        {# URLField — хранит валидный URL #}
-        <p><strong>Сайт (URLField):</strong> <a href="{{ event.website }}" target="_blank">{{ event.website }}</a></p>
+        <p><strong>Сайт:</strong> <a href="{{ event.website }}" target="_blank">{{ event.website }}</a></p>
     {% endif %}
     {% if event.image %}
         <img src="{{ event.image.url }}" style="max-height:200px; border-radius:6px; margin-bottom:12px;">

@@ -3,9 +3,6 @@
 {% block content %}
 <h1>{{ prosthesis.name }}</h1>
 
-{# get_absolute_url — текущий URL совпадает с prosthesis.get_absolute_url() #}
-<p style="color:#999; font-size:12px;">URL: {{ prosthesis.get_absolute_url }}</p>
-
 <div class="card">
     <p><strong>Тип:</strong> {{ prosthesis.prosthesis_type.name }}</p>
     <p><strong>Описание:</strong> {{ prosthesis.description|default:"—" }}</p>
@@ -16,8 +13,7 @@
     {% endif %}
 </div>
 
-{# related_name в действии: prosthesis.requests.all() — заявки на этот протез #}
-<h2>Заявки на этот протез (related_name='requests')</h2>
+<h2>Заявки на этот протез</h2>
 <div class="card">
 {% if related_requests %}
 <table>
@@ -28,7 +24,6 @@
     {% for req in related_requests %}
         <tr>
             <td>{{ req.pk }}</td>
-            {# choices: get_request_type_display() — человекочитаемое значение #}
             <td>{{ req.get_request_type_display }}</td>
             <td>{{ req.contact_name }} &lt;{{ req.contact_email }}&gt;</td>
             <td>{{ req.status }}</td>

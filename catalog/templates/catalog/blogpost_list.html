@@ -1,0 +1,30 @@
+{% extends "catalog/base.html" %}
+{% block title %}Блог{% endblock %}
+{% block content %}
+<h1>Блог</h1>
+
+<div class="card">
+{% if posts %}
+<table>
+    <thead>
+        <tr>
+            <th>Дата</th>
+            <th>Заголовок</th>
+            <th>Автор</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for post in posts %}
+        <tr>
+            <td style="white-space:nowrap">{{ post.published_at|date:"d.m.Y" }}</td>
+            <td><a href="{{ post.get_absolute_url }}">{{ post.title }}</a></td>
+            <td>{{ post.author|default:"—" }}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% else %}
+    <p style="color:#999">Статей пока нет.</p>
+{% endif %}
+</div>
+{% endblock %}

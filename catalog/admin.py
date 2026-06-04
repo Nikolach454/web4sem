@@ -175,9 +175,11 @@ class RoleAdmin(admin.ModelAdmin):
     search_fields = ('name', 'description')
     readonly_fields = ('id',)
 
-    @admin.display(description='Кол-во пользователей')
+    # short_description задаёт заголовок колонки в list_display.
+    # Это классический способ — эквивалентен @admin.display(description='...').
     def users_count(self, obj):
         return obj.users.count()
+    users_count.short_description = 'Кол-во пользователей'
 
 
 @admin.register(ProsthesisType)

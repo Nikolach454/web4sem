@@ -1,3 +1,4 @@
 Django==5.1.4
 Pillow==10.4.0
 reportlab==4.2.5
+django-debug-toolbar==6.3.0

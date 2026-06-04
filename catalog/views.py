@@ -342,12 +342,26 @@ def orm_demo(request):
 
 
 # ══════════════════════════════════════════════
-# ДОПОЛНИТЕЛЬНЫЕ DETAIL-ВЬЮХИ
+# БЛОГ
 # ══════════════════════════════════════════════
+
+def blogpost_list(request):
+    posts = BlogPost.objects.filter(is_published=True).select_related('author').order_by('-published_at')
+    return render(request, 'catalog/blogpost_list.html', {'posts': posts})
+
 
 def blogpost_detail(request, pk):
     post = get_object_or_404(BlogPost.objects.select_related('author'), pk=pk)
     return render(request, 'catalog/blogpost_detail.html', {'post': post})
+
+
+# ══════════════════════════════════════════════
+# МЕРОПРИЯТИЯ
+# ══════════════════════════════════════════════
+
+def event_list(request):
+    events = Event.objects.select_related('author').order_by('-event_date')
+    return render(request, 'catalog/event_list.html', {'events': events})
 
 
 def event_detail(request, pk):
@@ -355,6 +369,16 @@ def event_detail(request, pk):
     return render(request, 'catalog/event_detail.html', {'event': event})
 
 
+# ══════════════════════════════════════════════
+# ДОКУМЕНТЫ
+# ══════════════════════════════════════════════
+
+def document_list(request):
+    docs = Document.objects.select_related('uploaded_by').order_by('-uploaded_at')
+    return render(request, 'catalog/document_list.html', {'docs': docs})
+
+
 def document_detail(request, pk):
     doc = get_object_or_404(Document.objects.select_related('uploaded_by'), pk=pk)
     return render(request, 'catalog/document_detail.html', {'doc': doc})
+

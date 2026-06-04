@@ -3,16 +3,15 @@
 {% block content %}
 <h1>Заявки</h1>
 
-{# Демонстрация: filter по полям связанной модели (user__last_name__icontains) #}
 <div class="card">
     <form method="get">
         <div style="display:flex; gap:12px; flex-wrap:wrap; align-items:flex-end;">
             <div>
-                <label>Поиск по фамилии (user__last_name__icontains):</label>
-                <input type="text" name="user" value="{{ request.GET.user }}" placeholder="Фамилия пользователя...">
+                <label>Поиск по фамилии:</label>
+                <input type="text" name="user" value="{{ request.GET.user }}" placeholder="Фамилия...">
             </div>
             <div>
-                <label>Тип заявки (choices):</label>
+                <label>Тип заявки:</label>
                 <select name="type">
                     <option value="">Все</option>
                     {% for val, label in type_choices %}
@@ -23,7 +22,7 @@
             <div>
                 <label>
                     <input type="checkbox" name="recent" {% if request.GET.recent %}checked{% endif %}>
-                    За последние 30 дней (created_at__gte)
+                    За последние 30 дней
                 </label>
             </div>
             <button type="submit" class="btn btn-primary">Фильтр</button>
@@ -41,9 +40,9 @@
     <thead>
         <tr>
             <th>#</th>
-            <th>Тип (choices)</th>
+            <th>Тип</th>
             <th>Контакт</th>
-            <th>Пользователь (related)</th>
+            <th>Пользователь</th>
             <th>Статус</th>
             <th>Дата</th>
             <th></th>
@@ -53,7 +52,6 @@
     {% for req in requests %}
         <tr>
             <td>{{ req.pk }}</td>
-            {# choices: get_request_type_display() #}
             <td>
                 {% if req.request_type == 'prosthesis' %}
                     <span class="badge badge-blue">{{ req.get_request_type_display }}</span>
@@ -62,7 +60,6 @@
                 {% endif %}
             </td>
             <td>{{ req.contact_name }}<br><small>{{ req.contact_email }}</small></td>
-            {# related_name: req.user — пользователь через FK #}
             <td>{{ req.user|default:"Гость" }}</td>
             <td>{{ req.status }}</td>
             <td>{{ req.created_at|date:"d.m.Y H:i" }}</td>

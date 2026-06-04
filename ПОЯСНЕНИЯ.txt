@@ -1,445 +1,57 @@
 ═══════════════════════════════════════════════════════════════
-  ПОЯСНЕНИЯ К ЛАБОРАТОРНОЙ РАБОТЕ — Django 4
-  Как запустить и где смотреть каждое задание
+  ПОЯСНЕНИЯ К ПРОЕКТУ — Django 5.1  (веб 4 сем)
 ═══════════════════════════════════════════════════════════════
 
-──────────────────────────────────────────────────────────────
-  ПЕРВЫЙ ЗАПУСК (один раз)
-──────────────────────────────────────────────────────────────
+Подробные пояснения разбиты по заданиям:
 
-1. Установить зависимости:
-   pip install -r requirements.txt
+  ЗАДАНИЕ_БАЗА.txt     — Модели (таблицы, __str__, verbose_name)
+                          и Администратор (все настройки admin.py)
 
-2. Применить миграции (уже применены, но для чистой базы):
-   python manage.py migrate
+  ЗАДАНИЕ_ЧАСТЬ_1.txt  — timezone, ordering, choices, related_name,
+                          filter/exclude/order_by, __, менеджер,
+                          get_absolute_url, aggregate/annotate
+                          + ответы: миграции, QuerySet, regex в URLs
 
-3. Создать суперпользователя для админки:
-   python manage.py createsuperuser
+  ЗАДАНИЕ_ЧАСТЬ_2.txt  — CRUD, requirements.txt,
+                          ManyToManyField through,
+                          select_related, prefetch_related
+                          + ответ: pip install -r
 
-4. Запустить сервер:
-   python manage.py runserver
+  ЗАДАНИЕ_ЧАСТЬ_3.txt  — ImageField, FileField, redirect,
+                          PDF в админке, собственное действие
+                          + ответы: метод модели, File Uploads
 
-5. Открыть в браузере:
-   Сайт:   http://127.0.0.1:8000/catalog/prostheses/
-   Админка: http://127.0.0.1:8000/admin/
-
-
-══════════════════════════════════════════════════════════════
-  БАЗОВАЯ ЧАСТЬ — Модели и Администратор
-══════════════════════════════════════════════════════════════
-
-ЗАДАНИЕ: Описать все таблицы в моделях. __str__, verbose_name.
-ГДЕ СМОТРЕТЬ: catalog/models.py
-  → Каждый класс (Role, User, Prosthesis, Request и др.) имеет:
-    - метод __str__
-    - verbose_name и verbose_name_plural в class Meta
-    - verbose_name у каждого поля
-
-ЗАДАНИЕ: Настроить административную часть (list_display, list_filter,
-         inlines, date_hierarchy, @admin.display, raw_id_fields,
-         readonly_fields, search_fields, list_display_links).
-ГДЕ СМОТРЕТЬ: catalog/admin.py
-  → Открыть http://127.0.0.1:8000/admin/
-  → Зайти в раздел "Протезы" — виден list_display с кастомным методом
-    image_preview, list_filter справа, поиск сверху, date_hierarchy внизу
-  → Зайти в "Пользователи" — снизу видны inlines (роли, заявки, статьи)
-  → В "Заявки" и "Роли пользователей" — кнопки выбора (raw_id_fields)
-    вместо выпадающих списков
-
-ЗАДАНИЕ: LANGUAGE_CODE = 'ru'
-ГДЕ СМОТРЕТЬ: config/settings.py, строка LANGUAGE_CODE = 'ru'
-  → Кнопки в админке будут на русском языке автоматически
+  ЗАДАНИЕ_ЧАСТЬ_4.txt  — URLField, __icontains/__contains,
+                          values/values_list, count/exists, update/delete
+                          + ответы: кеш, F-expressions, Http404
 
 
 ══════════════════════════════════════════════════════════════
-  ЧАСТЬ 1 — Django ORM: основы
+  ПЕРВЫЙ ЗАПУСК
 ══════════════════════════════════════════════════════════════
 
-ЗАДАНИЕ: from django.utils import timezone (минимум 3 примера)
-ГДЕ СМОТРЕТЬ: catalog/models.py
-  Пример 1 — User.created_at (дата регистрации пользователя)
-    Кейс: фильтрация новых пользователей за последние N дней,
-          отправка приветственных писем через неделю после регистрации.
-  Пример 2 — Prosthesis.created_at (дата добавления в каталог)
-    Кейс: показ новинок за последний месяц, сортировка по новизне.
-  Пример 3 — Request.created_at (дата создания заявки)
-    Кейс: SLA-контроль (заявки без ответа более 3 дней),
-          автоматическое закрытие старых заявок.
-  → Комментарии прямо в models.py перед каждым полем.
+  pip install -r requirements.txt
+  python manage.py migrate
+  python manage.py createsuperuser
+  python manage.py seed_data
+  python manage.py runserver
 
-ЗАДАНИЕ: class Meta: ordering
-ГДЕ СМОТРЕТЬ: catalog/models.py — каждая модель имеет class Meta с ordering
-  Примеры: ordering = ['name'], ordering = ['-created_at']
-  КАК ПРОВЕРИТЬ: открыть http://127.0.0.1:8000/catalog/prostheses/
-    → протезы отсортированы по имени по умолчанию
-
-ЗАДАНИЕ: choices в поле модели
-ГДЕ СМОТРЕТЬ: catalog/models.py
-  Request.request_type — choices: 'На протез' / 'Инвестор'
-  Document.doc_type — choices: 'Сертификат' / 'Лицензия' / 'Прочее'
-  КАК ПРОВЕРИТЬ: открыть http://127.0.0.1:8000/catalog/requests/
-    → в колонке "Тип" видны метки из choices (не коды 'prosthesis'/'investor')
-    → в views.py: req.get_request_type_display() — возвращает читаемое значение
-
-ЗАДАНИЕ: related_name — показать пример использования
-ГДЕ СМОТРЕТЬ: catalog/models.py + catalog/views.py + шаблоны
-  Определено в models.py:
-    Prosthesis.requests (related_name='requests') — заявки на протез
-    User.requests (related_name='requests') — заявки пользователя
-    User.blog_posts (related_name='blog_posts') — статьи пользователя
-    ProsthesisType.prostheses (related_name='prostheses') — протезы типа
-  Используется в views.py (prosthesis_detail):
-    related_requests = prosthesis.requests.select_related('status').all()
-  КАК ПРОВЕРИТЬ:
-    → Создать протез и заявку на него через http://127.0.0.1:8000/admin/
-    → Открыть страницу протеза — внизу список заявок через related_name
-
-ЗАДАНИЕ: Метод filter() в view
-ГДЕ СМОТРЕТЬ: catalog/views.py — функция prosthesis_list()
-  qs = qs.filter(prosthesis_type_id=type_id)
-  qs = qs.filter(name__icontains=search)
-  КАК ПРОВЕРИТЬ: http://127.0.0.1:8000/catalog/prostheses/
-    → Выбрать тип в фильтре или ввести поисковый запрос
-
-ЗАДАНИЕ: Использование __ (два варианта)
-ГДЕ СМОТРЕТЬ: catalog/views.py
-  Вариант 1 — метод поля (lookup):
-    qs.filter(created_at__gte=thirty_days_ago)   — за последние 30 дней
-    prosthesis.requests.filter(price__isnull=True)
-  Вариант 2 — обращение к связанной таблице:
-    qs.filter(prosthesis_type__name__icontains=search)
-    qs.filter(user__last_name__icontains=user_search)
-  КАК ПРОВЕРИТЬ: http://127.0.0.1:8000/catalog/requests/
-    → В поле "Поиск по фамилии" ввести фамилию
-    → Поставить галочку "За последние 30 дней"
-
-ЗАДАНИЕ: Метод exclude()
-ГДЕ СМОТРЕТЬ: catalog/views.py — prosthesis_list() и orm_demo()
-  qs = qs.exclude(price__isnull=True)   — исключить без цены
-  Prosthesis.objects.exclude(is_active=False)  — только активные
-  КАК ПРОВЕРИТЬ: http://127.0.0.1:8000/catalog/prostheses/
-    → Поставить галочку "Скрыть без цены"
-    http://127.0.0.1:8000/catalog/orm-demo/
-    → Блок "exclude() — протезы КРОМЕ неактивных"
-
-ЗАДАНИЕ: Метод order_by()
-ГДЕ СМОТРЕТЬ: catalog/views.py — prosthesis_list() и orm_demo()
-  qs = qs.order_by(sort)  — сортировка по выбранному полю
-  КАК ПРОВЕРИТЬ: http://127.0.0.1:8000/catalog/prostheses/
-    → Выбрать "По цене ↑" или "По цене ↓" в выпадающем списке сортировки
-    http://127.0.0.1:8000/catalog/orm-demo/
-    → Таблица "order_by('-price', 'name')"
-
-ЗАДАНИЕ: Собственный модельный менеджер
-ГДЕ СМОТРЕТЬ: catalog/models.py — класс ActiveManager
-  class ActiveManager(models.Manager):
-      def get_queryset(self):
-          return super().get_queryset().filter(is_active=True)
-  Подключён в Prosthesis:
-      objects = models.Manager()   # стандартный
-      active  = ActiveManager()    # только активные
-  Используется в views.py:
-      qs = Prosthesis.active.all()    — только активные протезы
-      name_hints = Prosthesis.active.values_list('name', flat=True)
-  КАК ПРОВЕРИТЬ: http://127.0.0.1:8000/catalog/stats/
-    → "active.count()" — показывает только активные
-
-ЗАДАНИЕ: get_absolute_url + reverse
-ГДЕ СМОТРЕТЬ: catalog/models.py — каждая основная модель
-  def get_absolute_url(self):
-      return reverse('catalog:prosthesis_detail', args=[self.pk])
-  Используется в шаблонах: {{ prosthesis.get_absolute_url }}
-  Используется в views.py после сохранения: return redirect(prosthesis.get_absolute_url())
-  КАК ПРОВЕРИТЬ:
-    → Создать протез, нажать "Сохранить" — автоматически открывается
-      страница протеза (redirect через get_absolute_url)
-    → В списке протезов ссылка на название — через get_absolute_url
-    → В строке браузера URL вида /catalog/prostheses/5/
-
-ЗАДАНИЕ: Функции агрегирования и аннотирования (три примера)
-ГДЕ СМОТРЕТЬ: catalog/views.py — функция stats()
-КАК ПРОВЕРИТЬ: http://127.0.0.1:8000/catalog/stats/
-  Агрегации (aggregate):
-    price_stats = Prosthesis.objects.aggregate(
-        avg_price=Avg('price'), max_price=Max('price'),
-        min_price=Min('price'), total_price=Sum('price'), total_count=Count('id')
-    )
-  Аннотации:
-    Пример 1: ProsthesisType.objects.annotate(prosthesis_count=Count('prostheses'))
-    Пример 2: Prosthesis.objects.annotate(request_count=Count('requests'))
-    Пример 3: User.objects.annotate(post_count=Count('blog_posts'))
-
-ВОПРОСЫ:
-
-Создание и применение миграций:
-  1. python manage.py makemigrations   — создаёт файл миграции в catalog/migrations/
-  2. python manage.py migrate          — применяет миграции к базе данных
-  3. python manage.py showmigrations   — показывает статус всех миграций
-  Файлы миграций: catalog/migrations/0001_initial.py, 0002_...py
-
-Работа с QuerySet и менеджерами:
-  QuerySet — это ленивый запрос к БД. Он не выполняется до момента
-  обращения к данным (итерация, срезы, len(), print()).
-  Менеджеры: objects (по умолчанию), можно создать свои (ActiveManager).
-  Цепочки: Prosthesis.objects.filter(...).exclude(...).order_by(...)
-  Каждый метод возвращает новый QuerySet, запрос к БД — один раз в конце.
-
-Регулярные выражения в URLs:
-  catalog/urls.py — re_path:
-    re_path(r'^prostheses/(?P<pk>[0-9]+)/$', views.prosthesis_detail)
-  Синтаксис:
-    ^       — начало URL
-    $       — конец URL
-    [0-9]+  — одна или более цифр
-    (?P<pk>...)  — именованная группа, передаётся в view как параметр pk
-    \d+     — то же что [0-9]+, но короче
+  Сайт:    http://127.0.0.1:8000/catalog/prostheses/
+  Админка: http://127.0.0.1:8000/admin/
 
 
 ══════════════════════════════════════════════════════════════
-  ЧАСТЬ 2 — CRUD, M2M, select/prefetch_related
+  БЫСТРЫЙ СПРАВОЧНИК — ЧТО СМОТРЕТЬ
 ══════════════════════════════════════════════════════════════
 
-ЗАДАНИЕ: Демонстрация создания, редактирования, удаления на сайте
-ГДЕ СМОТРЕТЬ: catalog/views.py — prosthesis_create/edit/delete
-КАК ПРОВЕРИТЬ:
-  Создать:    http://127.0.0.1:8000/catalog/prostheses/create/
-  Редактировать: http://127.0.0.1:8000/catalog/prostheses/1/edit/
-  Удалить:    http://127.0.0.1:8000/catalog/prostheses/1/delete/
-  → После каждого действия происходит redirect (Часть 3)
+  /catalog/prostheses/         filter, exclude, order_by, icontains, count
+  /catalog/prostheses/create/  CRUD, ImageField, redirect, get_absolute_url
+  /catalog/prostheses/1/       Http404, related_name
+  /catalog/requests/           choices, filter по FK, __ к связанной таблице
+  /catalog/stats/              aggregate, annotate, values_list, exists
+  /catalog/orm-demo/           update(), delete(), exclude()
 
-ЗАДАНИЕ: Файл requirements.txt
-ГДЕ СМОТРЕТЬ: requirements.txt (в корне проекта)
-  Django==5.1.4
-  Pillow==10.4.0       — для ImageField
-  reportlab==4.2.5     — для генерации PDF
-
-ВОПРОС pip install -r requirements.txt:
-  Команда устанавливает все зависимости из файла requirements.txt.
-  -r означает "читать из файла".
-  Используется для воспроизведения окружения на другом компьютере.
-
-ЗАДАНИЕ: ManyToManyField с параметром through
-ГДЕ СМОТРЕТЬ: catalog/models.py
-  User.roles = ManyToManyField(Role, through='UserRole')
-  UserRole — промежуточная таблица, содержит user, role, assigned_at
-  Зачем through: позволяет хранить доп. данные в связи (здесь — дату назначения)
-КАК ПРОВЕРИТЬ: http://127.0.0.1:8000/admin/catalog/user/
-  → Открыть любого пользователя → Inline "Роли пользователя" показывает
-    таблицу UserRole с полем "Дата назначения"
-
-ЗАДАНИЕ: select_related()
-ГДЕ СМОТРЕТЬ: catalog/views.py
-  qs = Prosthesis.active.all().select_related('prosthesis_type')
-  Используется для ForeignKey — загружает связанный объект одним JOIN.
-  Без select_related: N протезов = N+1 запросов к БД.
-  С select_related: всегда 1 запрос.
-КАК ПРОВЕРИТЬ: http://127.0.0.1:8000/catalog/prostheses/
-  → Список протезов с типами — всё загружается 1 запросом
-
-ЗАДАНИЕ: prefetch_related()
-ГДЕ СМОТРЕТЬ: catalog/views.py — функция stats()
-  users = User.objects.prefetch_related('roles').all()
-  Используется для ManyToMany и обратных FK — делает отдельный SELECT
-  и объединяет в Python, а не JOIN.
-КАК ПРОВЕРИТЬ: http://127.0.0.1:8000/catalog/stats/
-  → Таблица "prefetch_related('roles') — пользователи с ролями"
-
-
-══════════════════════════════════════════════════════════════
-  ЧАСТЬ 3 — Файлы, PDF, actions
-══════════════════════════════════════════════════════════════
-
-ЗАДАНИЕ: models.ImageField
-ГДЕ СМОТРЕТЬ: catalog/models.py
-  Prosthesis.image = ImageField(upload_to='prostheses/')
-  BlogPost.image   = ImageField(upload_to='blog/')
-  Event.image      = ImageField(upload_to='events/')
-  Требует: pip install Pillow
-КАК ПРОВЕРИТЬ: http://127.0.0.1:8000/catalog/prostheses/create/
-  → В форме есть поле "Изображение" для загрузки файла
-  → После загрузки файл сохраняется в папку media/prostheses/
-  → В списке протезов отображается превью
-
-ЗАДАНИЕ: return redirect
-ГДЕ СМОТРЕТЬ: catalog/views.py
-  prosthesis_create: return redirect(prosthesis.get_absolute_url())
-  prosthesis_edit:   return redirect(prosthesis.get_absolute_url())
-  prosthesis_delete: return redirect('catalog:prosthesis_list')
-  request_create:    return redirect('catalog:request_list')
-КАК ПРОВЕРИТЬ:
-  → Создать протез → после сохранения браузер перешёл на страницу протеза
-  → Удалить протез → после удаления браузер перешёл на список
-
-ЗАДАНИЕ: Генерация PDF в админке (стр. 488 учебника)
-ГДЕ СМОТРЕТЬ: catalog/admin.py — функции export_requests_pdf, export_prostheses_pdf
-КАК ПРОВЕРИТЬ:
-  1. pip install reportlab
-  2. http://127.0.0.1:8000/admin/catalog/request/
-  3. Отметить несколько заявок галочкой
-  4. В выпадающем "Действие" выбрать "Сгенерировать PDF-отчёт"
-  5. Нажать "Выполнить" → скачается файл requests_report.pdf
-  Аналогично для протезов в /admin/catalog/prosthesis/
-
-ЗАДАНИЕ: Добавить действие на сайт администрирования
-ГДЕ СМОТРЕТЬ: catalog/admin.py — функция mark_in_progress
-  @admin.action(description='Пометить заявки как "В обработке"')
-  def mark_in_progress(modeladmin, request, queryset):
-      status = RequestStatus.objects.first()
-      queryset.update(status=status)
-КАК ПРОВЕРИТЬ:
-  → http://127.0.0.1:8000/admin/catalog/request/
-  → Отметить заявки, выбрать действие "Пометить заявки как В обработке"
-
-ЗАДАНИЕ: models.FileField
-ГДЕ СМОТРЕТЬ: catalog/models.py
-  Document.file = FileField(upload_to='documents/')
-КАК ПРОВЕРИТЬ: http://127.0.0.1:8000/admin/catalog/document/add/
-  → В форме есть поле "Файл" для загрузки любого файла
-  → Файл сохраняется в media/documents/
-  → В списке документов — ссылка "Открыть"
-
-ВОПРОС: Создание собственного функционального метода в модели (стр. 410)
-ГДЕ СМОТРЕТЬ: catalog/models.py
-  User.full_name — @property, возвращает "Фамилия Имя"
-  Это пример функционального метода/свойства модели.
-  Используется в admin.py: return obj.full_name
-  Используется в шаблонах: {{ user.full_name }}
-
-ВОПРОС: File Uploads — особенности сохранения файлов в формах:
-  1. В форме обязателен enctype="multipart/form-data"
-  2. В view файлы передаются через request.FILES, не request.POST
-     form = ProsthesisForm(request.POST, request.FILES)
-  3. Файлы сохраняются в MEDIA_ROOT (настроен в settings.py)
-  4. URL файла доступен через obj.image.url
-  5. В продакшене файлы отдаёт nginx, не Django
-
-
-══════════════════════════════════════════════════════════════
-  ЧАСТЬ 4 — Продвинутый QuerySet
-══════════════════════════════════════════════════════════════
-
-ЗАДАНИЕ: models.URLField()
-ГДЕ СМОТРЕТЬ: catalog/models.py
-  Event.website = URLField(blank=True, null=True)
-  Автоматически валидирует формат URL при сохранении через форму.
-КАК ПРОВЕРИТЬ: http://127.0.0.1:8000/admin/catalog/event/add/
-  → Поле "Сайт мероприятия" принимает только корректные URL
-  → Попробуйте ввести "не-урл" — Django выдаст ошибку валидации
-
-ЗАДАНИЕ: __icontains и __contains
-ГДЕ СМОТРЕТЬ: catalog/views.py — prosthesis_list()
-  __icontains — без учёта регистра (ILIKE '%...%' в SQL):
-    qs.filter(name__icontains=search)
-    qs.filter(prosthesis_type__name__icontains=search)
-  __contains  — с учётом регистра (LIKE '%...%' в SQL):
-    qs.filter(description__contains=exact_search)
-КАК ПРОВЕРИТЬ: http://127.0.0.1:8000/catalog/prostheses/
-  → Поле "Поиск" — использует __icontains (регистр не важен)
-  → Поле "Exact" — использует __contains (регистр важен)
-
-ЗАДАНИЕ: values() и values_list()
-ГДЕ СМОТРЕТЬ: catalog/views.py — функция stats()
-  values() — QuerySet словарей {'name': ..., 'price': ...}:
-    Prosthesis.objects.values('name', 'price', 'is_active')
-  values_list() — QuerySet кортежей или плоский список:
-    Prosthesis.objects.values_list('name', flat=True)   → ['Protez A', ...]
-    Prosthesis.objects.values_list('name', 'price')     → [('A', 100), ...]
-КАК ПРОВЕРИТЬ: http://127.0.0.1:8000/catalog/stats/
-  → Раздел "values()" и "values_list()"
-
-ЗАДАНИЕ: count() и exists()
-ГДЕ СМОТРЕТЬ: catalog/views.py
-  count()  — SELECT COUNT(*), возвращает число:
-    total_count = qs.count()
-    active_count = Prosthesis.active.count()
-  exists() — SELECT 1 LIMIT 1, возвращает True/False:
-    has_results = qs.exists()
-    has_expensive = Prosthesis.objects.filter(price__gte=100000).exists()
-  exists() быстрее count() когда нужно просто проверить наличие.
-КАК ПРОВЕРИТЬ:
-  http://127.0.0.1:8000/catalog/prostheses/ → "Найдено: N (exists=True/False)"
-  http://127.0.0.1:8000/catalog/stats/ → блок "count() и exists()"
-
-ЗАДАНИЕ: update() и delete()
-ГДЕ СМОТРЕТЬ: catalog/views.py — orm_demo()
-КАК ПРОВЕРИТЬ: http://127.0.0.1:8000/catalog/orm-demo/
-  update() — массовое обновление без загрузки объектов в Python:
-    Prosthesis.objects.filter(price__isnull=True).update(is_active=False)
-    → кнопка "Выполнить update()" деактивирует протезы без цены
-  delete() — массовое удаление:
-    Prosthesis.objects.filter(is_active=False).delete()
-    → возвращает (N, {'catalog.Prosthesis': N})
-    → в демо не выполняется, показан только синтаксис
-
-ВОПРОС: Использование кеш-фреймворка
-  Django поддерживает несколько бэкендов кеша:
-    - LocMemCache (в памяти процесса, по умолчанию)
-    - FileBasedCache (в файлах)
-    - Memcached / Redis
-  Использование в view:
-    from django.core.cache import cache
-    data = cache.get('my_key')
-    if data is None:
-        data = Prosthesis.objects.all()
-        cache.set('my_key', data, timeout=300)  # 5 минут
-
-ВОПРОС: F expressions
-  F() — ссылка на значение поля в БД, операция выполняется на стороне БД.
-  Примеры:
-    from django.db.models import F
-    # Увеличить цену всех протезов на 10%:
-    Prosthesis.objects.update(price=F('price') * 1.1)
-    # Найти протезы где цена > старой_цены (два поля одной записи):
-    Prosthesis.objects.filter(price__gt=F('old_price'))
-  Преимущество: не нужно загружать объект в Python — операция в SQL.
-
-ВОПРОС: The Http404 exception
-ГДЕ СМОТРЕТЬ: catalog/views.py — prosthesis_detail()
-  from django.http import Http404
-  try:
-      prosthesis = Prosthesis.objects.get(pk=pk)
-  except Prosthesis.DoesNotExist:
-      raise Http404('Протез не найден')
-  Альтернатива (короче):
-      prosthesis = get_object_or_404(Prosthesis, pk=pk)
-КАК ПРОВЕРИТЬ:
-  → Открыть http://127.0.0.1:8000/catalog/prostheses/99999/
-  → Django покажет страницу 404 (в DEBUG режиме — подробную)
-
-
-══════════════════════════════════════════════════════════════
-  СТРУКТУРА ФАЙЛОВ ПРОЕКТА
-══════════════════════════════════════════════════════════════
-
-веб 4 сем/
-├── manage.py
-├── requirements.txt          ← зависимости проекта
-├── db.sqlite3                ← база данных
-├── media/                    ← загруженные файлы (создаётся автоматически)
-│   ├── prostheses/
-│   ├── blog/
-│   ├── events/
-│   └── documents/
-├── config/
-│   ├── settings.py           ← LANGUAGE_CODE, MEDIA_ROOT/URL
-│   └── urls.py               ← подключение catalog.urls
-└── catalog/
-    ├── models.py             ← модели, ActiveManager, get_absolute_url
-    ├── views.py              ← все ORM-демонстрации
-    ├── urls.py               ← маршруты, re_path
-    ├── admin.py              ← админка, PDF-экшены, действия
-    ├── forms.py              ← ProsthesisForm, RequestForm
-    └── templates/catalog/
-        ├── base.html
-        ├── prosthesis_list.html    ← filter, exclude, order_by, icontains
-        ├── prosthesis_detail.html  ← related_name, get_absolute_url
-        ├── prosthesis_form.html    ← CRUD, ImageField
-        ├── prosthesis_confirm_delete.html
-        ├── request_list.html       ← filter по связанной таблице, choices
-        ├── request_form.html
-        ├── request_detail.html
-        ├── stats.html              ← aggregate, annotate, values, count
-        ├── orm_demo.html           ← update, delete, exclude, order_by
-        ├── blogpost_detail.html
-        ├── event_detail.html       ← URLField
-        └── document_detail.html    ← FileField
+  /admin/                      все настройки admin.py
+  /admin/catalog/user/         inlines, date_hierarchy, raw_id_fields
+  /admin/catalog/prosthesis/   filter_horizontal, image_preview, PDF-action
+  /admin/catalog/request/      цветные значки, mark_in_progress action

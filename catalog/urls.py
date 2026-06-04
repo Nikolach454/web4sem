@@ -25,13 +25,12 @@ URL-маршруты приложения catalog.
 """
 
 from django.urls import path, re_path
-from django.views.generic import RedirectView
 from . import views
 
 app_name = 'catalog'
 
 urlpatterns = [
-    path('', RedirectView.as_view(pattern_name='catalog:prosthesis_list')),
+    path('', views.home, name='home'),
 
     # ── Протезы ────────────────────────────────────────────────────────
     path('prostheses/', views.prosthesis_list, name='prosthesis_list'),

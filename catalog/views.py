@@ -25,6 +25,90 @@ from .forms import ProsthesisForm, RequestForm
 
 
 # ══════════════════════════════════════════════
+# ГЛАВНАЯ СТРАНИЦА
+# Демонстрирует:
+#   filter() + кастомный менеджер (active)
+#   order_by() (новинки, ближайшие события)
+#   select_related() для FK
+#   aggregate(): Count, Avg, Min
+#   Q() — поиск по нескольким полям
+#   exclude() через кастомный менеджер
+# ══════════════════════════════════════════════
+
+def home(request):
+    # Поиск (требование 7): поле ввода → SQL → результаты на странице
+    search_query = request.GET.get('q', '').strip()
+    search_results = None
+    if search_query:
+        # filter() + Q() + __icontains + select_related
+        search_results = (
+            Prosthesis.active
+            .select_related('prosthesis_type')
+            .filter(
+                Q(name__icontains=search_query) |
+                Q(description__icontains=search_query) |
+                Q(prosthesis_type__name__icontains=search_query)
+            )
+            .order_by('name')
+        )
+
+    # Виджет 1: новинки каталога — кастомный менеджер + order_by('-created_at')
+    latest_prostheses = (
+        Prosthesis.active
+        .select_related('prosthesis_type')
+        .order_by('-created_at')[:6]
+    )
+
+    # Виджет 2: последние статьи — filter(is_published=True) + order_by
+    recent_posts = (
+        BlogPost.objects
+        .filter(is_published=True)
+        .select_related('author')
+        .order_by('-published_at')[:4]
+    )
+
+    # Виджет 3: ближайшие мероприятия — filter(event_date__gte) + order_by
+    upcoming_events = (
+        Event.objects
+        .filter(event_date__gte=timezone.now())
+        .select_related('author')
+        .order_by('event_date')[:4]
+    )
+
+    # Агрегат (требование 6): COUNT, AVG, MIN по активным протезам
+    price_stats = Prosthesis.active.aggregate(
+        total=Count('id'),
+        avg_price=Avg('price'),
+        min_price=Min('price'),
+        max_price=Max('price'),
+    )
+
+    # Дополнительные счётчики
+    requests_count = Request.objects.count()
+    published_posts_count = BlogPost.objects.filter(is_published=True).count()
+
+    # annotate(): топ типов по количеству протезов
+    types_by_count = (
+        ProsthesisType.objects
+        .annotate(count=Count('prostheses'))
+        .filter(count__gt=0)
+        .order_by('-count')[:5]
+    )
+
+    return render(request, 'catalog/home.html', {
+        'search_query': search_query,
+        'search_results': search_results,
+        'latest_prostheses': latest_prostheses,
+        'recent_posts': recent_posts,
+        'upcoming_events': upcoming_events,
+        'price_stats': price_stats,
+        'requests_count': requests_count,
+        'published_posts_count': published_posts_count,
+        'types_by_count': types_by_count,
+    })
+
+
+# ══════════════════════════════════════════════
 # ПРОТЕЗЫ — LIST
 # Демонстрирует:
 #   filter(), exclude(), order_by()

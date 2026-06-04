@@ -1,43 +1,174 @@
 {% extends "catalog/base.html" %}
-{% block title %}{{ prosthesis.name }}{% endblock %}
-{% block content %}
-<h1>{{ prosthesis.name }}</h1>
+{% block title %}{{ prosthesis.name }} — ПротезМед{% endblock %}
 
-<div class="card">
-    <p><strong>Тип:</strong> {{ prosthesis.prosthesis_type.name }}</p>
-    <p><strong>Описание:</strong> {{ prosthesis.description|default:"—" }}</p>
-    <p><strong>Цена:</strong> {% if prosthesis.price %}{{ prosthesis.price }} руб.{% else %}не указана{% endif %}</p>
-    <p><strong>Добавлен:</strong> {{ prosthesis.created_at|date:"d.m.Y H:i" }}</p>
-    {% if prosthesis.image %}
-        <img src="{{ prosthesis.image.url }}" style="max-height:200px; border-radius:6px;">
-    {% endif %}
+{% block content %}
+
+<!-- Хлебные крошки -->
+<div style="font-size:13px;color:var(--text-muted);margin-bottom:18px;">
+  <a href="{% url 'catalog:home' %}" style="color:var(--primary-light);text-decoration:none;">Главная</a>
+  <span style="margin:0 6px;">›</span>
+  <a href="{% url 'catalog:prosthesis_list' %}" style="color:var(--primary-light);text-decoration:none;">Каталог</a>
+  <span style="margin:0 6px;">›</span>
+  <span>{{ prosthesis.name }}</span>
 </div>
 
-<h2>Заявки на этот протез</h2>
+<!-- Заголовок + кнопки CRUD -->
+<div style="display:flex;align-items:flex-start;justify-content:space-between;
+            gap:16px;margin-bottom:24px;flex-wrap:wrap;">
+  <div>
+    <h1 style="font-size:28px;font-weight:700;color:var(--text);line-height:1.2;">
+      {{ prosthesis.name }}
+    </h1>
+    <div style="margin-top:8px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+      <span class="badge badge-blue" style="font-size:13px;padding:4px 12px;">
+        {{ prosthesis.prosthesis_type.name }}
+      </span>
+      {% if prosthesis.is_active %}
+      <span class="badge badge-green">✓ Активен</span>
+      {% else %}
+      <span class="badge badge-red">Неактивен</span>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Кнопки управления (требование 5, 6) -->
+  <div style="display:flex;gap:10px;flex-wrap:wrap;flex-shrink:0;">
+    <a href="{% url 'catalog:prosthesis_list' %}" class="btn btn-secondary">
+      ← Назад
+    </a>
+    <a href="{% url 'catalog:prosthesis_edit' prosthesis.pk %}" class="btn btn-primary">
+      ✏ Редактировать
+    </a>
+    <a href="{% url 'catalog:prosthesis_delete' prosthesis.pk %}" class="btn btn-danger">
+      🗑 Удалить
+    </a>
+  </div>
+</div>
+
+<!-- Основная карточка -->
+<div style="display:grid;grid-template-columns:{% if prosthesis.image %}1fr 320px{% else %}1fr{% endif %};
+            gap:24px;margin-bottom:24px;align-items:start;">
+
+  <div class="card" style="margin-bottom:0;">
+    <div class="card-header">
+      <h2>Информация об изделии</h2>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0;">
+
+      <div style="padding:14px 0;border-bottom:1px solid var(--border);">
+        <div style="font-size:12px;font-weight:600;text-transform:uppercase;
+                    letter-spacing:.06em;color:var(--text-muted);margin-bottom:4px;">ID</div>
+        <div style="font-size:15px;font-weight:500;">{{ prosthesis.pk }}</div>
+      </div>
+
+      <div style="padding:14px 0;border-bottom:1px solid var(--border);padding-left:16px;">
+        <div style="font-size:12px;font-weight:600;text-transform:uppercase;
+                    letter-spacing:.06em;color:var(--text-muted);margin-bottom:4px;">Тип</div>
+        <div style="font-size:15px;font-weight:500;">{{ prosthesis.prosthesis_type.name }}</div>
+      </div>
+
+      <div style="padding:14px 0;border-bottom:1px solid var(--border);">
+        <div style="font-size:12px;font-weight:600;text-transform:uppercase;
+                    letter-spacing:.06em;color:var(--text-muted);margin-bottom:4px;">Цена</div>
+        {% if prosthesis.price %}
+        <div style="font-size:20px;font-weight:700;color:var(--primary);">
+          {{ prosthesis.price|floatformat:0 }} ₽
+        </div>
+        {% else %}
+        <div style="font-size:15px;color:var(--text-muted);font-style:italic;">По запросу</div>
+        {% endif %}
+      </div>
+
+      <div style="padding:14px 0;border-bottom:1px solid var(--border);padding-left:16px;">
+        <div style="font-size:12px;font-weight:600;text-transform:uppercase;
+                    letter-spacing:.06em;color:var(--text-muted);margin-bottom:4px;">Добавлен</div>
+        <div style="font-size:15px;font-weight:500;">{{ prosthesis.created_at|date:"d.m.Y H:i" }}</div>
+      </div>
+
+      {% if prosthesis.tags.all %}
+      <div style="padding:14px 0;grid-column:1/-1;">
+        <div style="font-size:12px;font-weight:600;text-transform:uppercase;
+                    letter-spacing:.06em;color:var(--text-muted);margin-bottom:8px;">Теги</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+          {% for tag in prosthesis.tags.all %}
+          <span class="badge badge-teal">{{ tag.name }}</span>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+    </div>
+
+    {% if prosthesis.description %}
+    <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border);">
+      <div style="font-size:12px;font-weight:600;text-transform:uppercase;
+                  letter-spacing:.06em;color:var(--text-muted);margin-bottom:8px;">Описание</div>
+      <p style="line-height:1.7;color:var(--text);font-size:14.5px;">{{ prosthesis.description }}</p>
+    </div>
+    {% endif %}
+  </div>
+
+  {% if prosthesis.image %}
+  <div>
+    <img src="{{ prosthesis.image.url }}"
+         style="width:100%;border-radius:12px;box-shadow:var(--shadow);object-fit:cover;max-height:340px;">
+  </div>
+  {% endif %}
+</div>
+
+<!-- Связанные заявки (related_name) -->
 <div class="card">
-{% if related_requests %}
-<table>
+  <div class="card-header">
+    <h2>📋 Заявки на это изделие</h2>
+    <a href="{% url 'catalog:request_create' %}" class="btn btn-primary btn-sm">+ Подать заявку</a>
+  </div>
+
+  {% if related_requests %}
+  <table>
     <thead>
-        <tr><th>#</th><th>Тип</th><th>Контакт</th><th>Статус</th><th>Дата</th></tr>
+      <tr>
+        <th>#</th>
+        <th>Тип заявки</th>
+        <th>Контакт</th>
+        <th>Статус</th>
+        <th>Дата</th>
+        <th></th>
+      </tr>
     </thead>
     <tbody>
-    {% for req in related_requests %}
-        <tr>
-            <td>{{ req.pk }}</td>
-            <td>{{ req.get_request_type_display }}</td>
-            <td>{{ req.contact_name }} &lt;{{ req.contact_email }}&gt;</td>
-            <td>{{ req.status }}</td>
-            <td>{{ req.created_at|date:"d.m.Y" }}</td>
-        </tr>
-    {% endfor %}
+      {% for req in related_requests %}
+      <tr>
+        <td style="color:var(--text-muted);font-weight:600;">{{ req.pk }}</td>
+        <td>
+          {% if req.request_type == 'prosthesis' %}
+          <span class="badge badge-blue">{{ req.get_request_type_display }}</span>
+          {% else %}
+          <span class="badge badge-purple">{{ req.get_request_type_display }}</span>
+          {% endif %}
+        </td>
+        <td>
+          <div style="font-weight:500;">{{ req.contact_name }}</div>
+          <div style="font-size:12px;color:var(--text-muted);">{{ req.contact_email }}</div>
+        </td>
+        <td><span class="badge badge-orange">{{ req.status }}</span></td>
+        <td style="color:var(--text-muted);">{{ req.created_at|date:"d.m.Y" }}</td>
+        <td>
+          <a href="{% url 'catalog:request_detail' req.pk %}" class="btn btn-outline btn-sm">
+            Детали
+          </a>
+        </td>
+      </tr>
+      {% endfor %}
     </tbody>
-</table>
-{% else %}
-    <p style="color:#999">Заявок нет.</p>
-{% endif %}
+  </table>
+  {% else %}
+  <div class="empty-state" style="padding:32px;">
+    <span class="icon">📋</span>
+    <p>Заявок на это изделие пока нет.</p>
+    <a href="{% url 'catalog:request_create' %}" class="btn btn-primary"
+       style="margin-top:12px;display:inline-flex;">Подать заявку</a>
+  </div>
+  {% endif %}
 </div>
 
-<a href="{% url 'catalog:prosthesis_list' %}" class="btn btn-secondary">← Назад</a>
-<a href="{% url 'catalog:prosthesis_edit' prosthesis.pk %}" class="btn btn-primary">Редактировать</a>
-<a href="{% url 'catalog:prosthesis_delete' prosthesis.pk %}" class="btn btn-danger">Удалить</a>
 {% endblock %}

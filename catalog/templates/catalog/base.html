@@ -2,49 +2,420 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>{% block title %}Каталог протезов{% endblock %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}ПротезМед{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #f5f5f5; }
-        nav { background: #2c3e50; padding: 12px 24px; }
-        nav a { color: #ecf0f1; text-decoration: none; margin-right: 16px; font-size: 14px; }
-        nav a:hover { color: #3498db; }
-        .container { max-width: 1100px; margin: 24px auto; padding: 0 16px; }
-        h1, h2 { color: #2c3e50; }
-        .card { background: #fff; border-radius: 6px; padding: 20px; margin-bottom: 16px; box-shadow: 0 1px 4px rgba(0,0,0,.1); }
-        table { width: 100%; border-collapse: collapse; }
-        th, td { text-align: left; padding: 8px 12px; border-bottom: 1px solid #eee; }
-        th { background: #ecf0f1; font-weight: bold; }
-        tr:hover { background: #fafafa; }
-        .btn { display: inline-block; padding: 7px 16px; border-radius: 4px; text-decoration: none; font-size: 13px; cursor: pointer; border: none; }
-        .btn-primary { background: #3498db; color: #fff; }
-        .btn-danger  { background: #e74c3c; color: #fff; }
-        .btn-secondary { background: #95a5a6; color: #fff; }
-        .btn:hover { opacity: .85; }
-        input[type=text], input[type=email], select, textarea {
-            padding: 6px 10px; border: 1px solid #ccc; border-radius: 4px; width: 100%; box-sizing: border-box; margin-top: 4px;
+        :root {
+            --primary:       #1565C0;
+            --primary-light: #1E88E5;
+            --primary-dark:  #0D47A1;
+            --accent:        #00ACC1;
+            --accent-dark:   #00838F;
+            --bg:            #F0F4F8;
+            --card-bg:       #FFFFFF;
+            --text:          #1A2332;
+            --text-muted:    #5A6B7B;
+            --border:        #E2E8F0;
+            --success:       #2E7D32;
+            --danger:        #C62828;
+            --warning:       #E65100;
+            --radius:        10px;
+            --shadow:        0 2px 10px rgba(0,0,0,0.07);
         }
-        .form-group { margin-bottom: 14px; }
-        label { font-weight: bold; font-size: 13px; }
-        .badge { display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: 12px; color: #fff; }
-        .badge-blue { background: #3498db; }
-        .badge-green { background: #2ecc71; }
-        .messages { list-style: none; padding: 0; }
-        .messages li { padding: 10px; margin-bottom: 8px; border-radius: 4px; background: #d4edda; color: #155724; }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Inter', Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            font-size: 15px;
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ── HEADER / NAV ─────────────────────────────── */
+        header {
+            background: var(--primary-dark);
+            position: sticky;
+            top: 0;
+            z-index: 200;
+            box-shadow: 0 2px 12px rgba(13,71,161,0.35);
+        }
+
+        .nav-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+            display: flex;
+            align-items: center;
+            height: 64px;
+            gap: 8px;
+        }
+
+        .nav-brand {
+            font-size: 20px;
+            font-weight: 700;
+            color: #fff;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-right: 28px;
+            white-space: nowrap;
+            letter-spacing: -0.01em;
+        }
+        .nav-brand .accent { color: var(--accent); }
+        .nav-brand .icon { font-size: 22px; }
+
+        .nav-links {
+            display: flex;
+            gap: 2px;
+            flex: 1;
+            flex-wrap: wrap;
+        }
+
+        .nav-links a {
+            color: rgba(255,255,255,0.82);
+            text-decoration: none;
+            padding: 7px 13px;
+            border-radius: 7px;
+            font-size: 13.5px;
+            font-weight: 500;
+            transition: background 0.15s, color 0.15s;
+            white-space: nowrap;
+        }
+
+        .nav-links a:hover { background: rgba(255,255,255,0.14); color: #fff; }
+        .nav-links a.nav-home { color: #fff; font-weight: 600; }
+        .nav-links a.nav-admin { color: rgba(255,255,255,0.45); font-size: 12.5px; }
+
+        /* ── MAIN CONTAINER ───────────────────────────── */
+        .container {
+            max-width: 1200px;
+            margin: 32px auto;
+            padding: 0 24px;
+            flex: 1;
+        }
+
+        /* ── PAGE HEADER ──────────────────────────────── */
+        .page-header { margin-bottom: 24px; }
+        .page-header h1 { font-size: 26px; font-weight: 700; color: var(--text); }
+        .page-header p { color: var(--text-muted); font-size: 14px; margin-top: 4px; }
+
+        /* ── CARDS ────────────────────────────────────── */
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 18px;
+            padding-bottom: 14px;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .card-header h2 {
+            font-size: 17px;
+            font-weight: 600;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card-header .see-all {
+            font-size: 13px;
+            color: var(--primary-light);
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .card-header .see-all:hover { text-decoration: underline; }
+
+        /* ── TABLES ───────────────────────────────────── */
+        table { width: 100%; border-collapse: collapse; font-size: 14px; }
+
+        th {
+            background: var(--bg);
+            color: var(--text-muted);
+            font-weight: 600;
+            font-size: 11.5px;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            padding: 10px 14px;
+            text-align: left;
+        }
+
+        td {
+            padding: 12px 14px;
+            border-bottom: 1px solid var(--border);
+            color: var(--text);
+            vertical-align: middle;
+        }
+
+        tr:last-child td { border-bottom: none; }
+        tbody tr:hover td { background: #F4F8FF; }
+
+        /* ── BUTTONS ──────────────────────────────────── */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 8px 18px;
+            border-radius: 7px;
+            text-decoration: none;
+            font-size: 13.5px;
+            font-weight: 500;
+            cursor: pointer;
+            border: none;
+            transition: background 0.15s, opacity 0.15s, transform 0.1s;
+            line-height: 1.4;
+            font-family: inherit;
+        }
+        .btn:active { transform: scale(0.97); }
+
+        .btn-primary   { background: var(--primary);   color: #fff; }
+        .btn-primary:hover  { background: var(--primary-dark); }
+        .btn-accent    { background: var(--accent);    color: #fff; }
+        .btn-accent:hover   { background: var(--accent-dark); }
+        .btn-danger    { background: var(--danger);    color: #fff; }
+        .btn-danger:hover   { background: #B71C1C; }
+        .btn-secondary { background: var(--border);    color: var(--text); }
+        .btn-secondary:hover { background: #CBD5E0; }
+        .btn-outline   { border: 1.5px solid var(--primary); color: var(--primary); background: transparent; }
+        .btn-outline:hover  { background: var(--primary); color: #fff; }
+        .btn-success   { background: var(--success); color: #fff; }
+        .btn-success:hover  { background: #1B5E20; }
+        .btn-sm { padding: 5px 12px; font-size: 12.5px; border-radius: 5px; }
+        .btn-lg { padding: 12px 28px; font-size: 15px; }
+
+        /* ── FORMS ────────────────────────────────────── */
+        .form-group { margin-bottom: 16px; }
+
+        label {
+            display: block;
+            font-weight: 600;
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-bottom: 5px;
+        }
+
+        input[type=text],
+        input[type=email],
+        input[type=number],
+        input[type=url],
+        select,
+        textarea {
+            width: 100%;
+            padding: 9px 12px;
+            border: 1.5px solid var(--border);
+            border-radius: 7px;
+            font-family: inherit;
+            font-size: 14px;
+            color: var(--text);
+            background: #fff;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary-light);
+            box-shadow: 0 0 0 3px rgba(30,136,229,0.12);
+        }
+
+        .errorlist { list-style: none; margin: 4px 0 0; padding: 0; }
+        .errorlist li { font-size: 12px; color: var(--danger); }
+
+        /* ── BADGES ───────────────────────────────────── */
+        .badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 11.5px;
+            font-weight: 600;
+        }
+        .badge-blue   { background: #E3F2FD; color: var(--primary); }
+        .badge-green  { background: #E8F5E9; color: var(--success); }
+        .badge-red    { background: #FFEBEE; color: var(--danger); }
+        .badge-orange { background: #FFF3E0; color: var(--warning); }
+        .badge-gray   { background: #ECEFF1; color: #546E7A; }
+        .badge-teal   { background: #E0F7FA; color: var(--accent-dark); }
+        .badge-purple { background: #F3E5F5; color: #6A1B9A; }
+
+        /* ── MESSAGES ─────────────────────────────────── */
+        .messages { list-style: none; margin-bottom: 16px; }
+        .messages li {
+            padding: 12px 18px;
+            border-radius: var(--radius);
+            background: #E8F5E9;
+            color: var(--success);
+            border-left: 4px solid var(--success);
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        /* ── EMPTY STATE ──────────────────────────────── */
+        .empty-state {
+            text-align: center;
+            padding: 48px 24px;
+            color: var(--text-muted);
+        }
+        .empty-state .icon { font-size: 44px; margin-bottom: 12px; display: block; }
+
+        /* ── FOOTER ───────────────────────────────────── */
+        footer {
+            background: var(--primary-dark);
+            color: rgba(255,255,255,0.65);
+            padding: 22px 24px;
+            font-size: 13px;
+            margin-top: auto;
+        }
+        .footer-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+        footer a { color: var(--accent); text-decoration: none; }
+        footer a:hover { text-decoration: underline; }
+
+        /* ── UTILITIES ────────────────────────────────── */
+        .text-muted  { color: var(--text-muted); }
+        .text-danger { color: var(--danger); }
+        .text-success{ color: var(--success); }
+        .fw-600 { font-weight: 600; }
+        .no-print { }
+
+        /* ══════════════════════════════════════════
+           PRINT STYLES
+           Адаптация всех страниц под печать
+           ══════════════════════════════════════════ */
+        @media print {
+            /* Скрываем интерактивные элементы */
+            header, footer, .no-print,
+            .btn, form, .nav-inner,
+            input, select, textarea,
+            .nav-links { display: none !important; }
+
+            /* Белый фон, чёрный текст, 12pt */
+            body {
+                background: white !important;
+                color: black !important;
+                font-size: 12pt;
+                line-height: 1.5;
+            }
+
+            /* Убираем ограничение контейнера */
+            .container {
+                max-width: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+
+            /* Карточки без теней */
+            .card {
+                box-shadow: none !important;
+                border: 1px solid #ccc !important;
+                page-break-inside: avoid;
+                margin-bottom: 16px !important;
+                padding: 16px !important;
+            }
+
+            /* Ссылки показываем URL */
+            a { color: black !important; text-decoration: none !important; }
+
+            /* Таблицы */
+            table { font-size: 10pt; }
+            th, td { padding: 6px 8px !important; }
+            th { background: #f0f0f0 !important; }
+
+            /* Заголовки не отрываются от содержимого */
+            h1, h2, h3 { page-break-after: avoid; color: black !important; }
+
+            .badge {
+                border: 1px solid currentColor !important;
+                background: transparent !important;
+            }
+
+            /* Печатный заголовок */
+            .print-header {
+                display: block !important;
+                padding-bottom: 12px;
+                margin-bottom: 20px;
+                border-bottom: 2px solid #000;
+                font-size: 13pt;
+            }
+
+            /* Цветные фоны убираем */
+            .hero-section { display: none !important; }
+
+            /* Скрываем виджет статистики с градиентами */
+            .stats-bar { display: none !important; }
+        }
+
+        .print-header { display: none; }
     </style>
 </head>
 <body>
-<nav>
-    <a href="{% url 'catalog:prosthesis_list' %}">Протезы</a>
-    <a href="{% url 'catalog:request_list' %}">Заявки</a>
-    <a href="{% url 'catalog:blogpost_list' %}">Блог</a>
-    <a href="{% url 'catalog:event_list' %}">Мероприятия</a>
-    <a href="{% url 'catalog:document_list' %}">Документы</a>
-    <a href="{% url 'catalog:stats' %}">Статистика</a>
-    <a href="{% url 'catalog:orm_demo' %}">Управление данными</a>
-    <a href="/admin/">Админка</a>
-</nav>
+
+<header>
+    <div class="nav-inner">
+        <a href="{% url 'catalog:home' %}" class="nav-brand">
+            <span class="icon">⚕</span>
+            <span><span class="accent">Протез</span>Мед</span>
+        </a>
+        <nav class="nav-links">
+            <a href="{% url 'catalog:home' %}" class="nav-home">Главная</a>
+            <a href="{% url 'catalog:prosthesis_list' %}">Каталог</a>
+            <a href="{% url 'catalog:request_list' %}">Заявки</a>
+            <a href="{% url 'catalog:blogpost_list' %}">Блог</a>
+            <a href="{% url 'catalog:event_list' %}">Мероприятия</a>
+            <a href="{% url 'catalog:document_list' %}">Документы</a>
+            <a href="{% url 'catalog:stats' %}">Статистика</a>
+            <a href="{% url 'catalog:orm_demo' %}">Управление</a>
+            <a href="/admin/" class="nav-admin">Админ</a>
+        </nav>
+    </div>
+</header>
+
+<div class="print-header">
+    <strong>ПротезМед — Центр современного протезирования</strong>
+    &nbsp;|&nbsp; Распечатано: {% now "d.m.Y H:i" %}
+</div>
+
 <div class="container">
+    {% if messages %}
+    <ul class="messages">
+        {% for msg in messages %}<li>{{ msg }}</li>{% endfor %}
+    </ul>
+    {% endif %}
     {% block content %}{% endblock %}
 </div>
+
+<footer>
+    <div class="footer-inner">
+        <span>© 2025 <strong style="color:#fff;">ПротезМед</strong> — Центр современного протезирования</span>
+        <span>
+            <a href="{% url 'catalog:home' %}">Главная</a> ·
+            <a href="{% url 'catalog:prosthesis_list' %}">Каталог</a> ·
+            <a href="{% url 'catalog:event_list' %}">Мероприятия</a> ·
+            <a href="/admin/">Администрирование</a>
+        </span>
+    </div>
+</footer>
+
 </body>
 </html>

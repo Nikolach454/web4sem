@@ -1,334 +1,494 @@
 {% extends "catalog/base.html" %}
-{% block title %}ПротезМед — Центр протезирования{% endblock %}
+{% block title %}ПротезМед — Современные решения протезирования{% endblock %}
 
 {% block content %}
 
-<!-- ═══════════════════════════════════════
-     HERO + ПОИСК
-     ═══════════════════════════════════════ -->
-<div class="hero-section" style="
-    background: linear-gradient(135deg, #0D47A1 0%, #1565C0 55%, #0097A7 100%);
-    border-radius: 16px;
-    padding: 52px 48px;
-    margin-bottom: 28px;
-    color: white;
-    position: relative;
-    overflow: hidden;">
+<!-- ════════════════════════════════════════
+     HERO SECTION
+     ════════════════════════════════════════ -->
+<section class="hero-section" aria-labelledby="hero-heading"
+         style="background: var(--card-bg);
+                border-radius: var(--radius-lg);
+                padding: 3rem 3rem 2.5rem;
+                margin-bottom: 1.5rem;
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 2rem;
+                align-items: center;
+                overflow: hidden;
+                position: relative;">
 
-  <!-- декоративные круги -->
-  <div style="position:absolute;right:-50px;top:-50px;width:240px;height:240px;
-              border-radius:50%;background:rgba(255,255,255,.05);pointer-events:none;"></div>
-  <div style="position:absolute;right:80px;bottom:-80px;width:320px;height:320px;
-              border-radius:50%;background:rgba(255,255,255,.04);pointer-events:none;"></div>
+    <div>
+        <h1 id="hero-heading"
+            style="font-family: 'Montserrat', sans-serif;
+                   font-size: 2.75rem;
+                   font-weight: 800;
+                   text-transform: uppercase;
+                   color: var(--primary-dark);
+                   line-height: 1.1;
+                   margin-bottom: 1rem;">
+            Современные решения<br>протезирования
+        </h1>
+        <p style="font-size: 1rem; color: var(--text-muted); margin-bottom: 1.75rem; line-height: 1.7; max-width: 30rem;">
+            Изготавливаем и помогаем получить современные протезы
+            людям с врождёнными особенностями и ампутациями.
+        </p>
 
-  <div style="position:relative;z-index:1;max-width:640px;">
-    <p style="font-size:12px;font-weight:600;text-transform:uppercase;
-              letter-spacing:.1em;color:rgba(255,255,255,.65);margin-bottom:10px;">
-      Центр современного протезирования
-    </p>
-    <h1 style="font-size:38px;font-weight:700;line-height:1.15;margin-bottom:14px;">
-      Возвращаем свободу движения
-    </h1>
-    <p style="font-size:15px;color:rgba(255,255,255,.82);margin-bottom:30px;line-height:1.6;">
-      Современные протезы верхних и нижних конечностей, экзоскелеты
-      и реабилитационное оборудование.
-      {% if price_stats.total %}В каталоге {{ price_stats.total }} изделий.{% endif %}
-    </p>
+        <!-- Поиск (требование 7: поле → SQL → результат) -->
+        <form method="GET" action="" role="search" style="display:flex; gap:0.625rem; margin-bottom:1.75rem; max-width:30rem;">
+            <label for="hero-search" class="sr-only">Найти протез</label>
+            <input type="text"
+                   id="hero-search"
+                   name="q"
+                   value="{{ search_query }}"
+                   placeholder="Найти протез…"
+                   autocomplete="off"
+                   style="flex:1; border-radius:var(--radius-pill); border:2px solid var(--primary);
+                          padding: 0.625rem 1.125rem; font-size:0.9375rem;">
+            <button type="submit" class="btn btn-primary">
+                <span aria-hidden="true">🔍</span>
+                <span>Найти</span>
+            </button>
+        </form>
 
-    <!-- ПОИСК (требование 7) -->
-    <form method="GET" action=""
-          style="display:flex;gap:10px;max-width:560px;">
-      <input type="text" name="q" value="{{ search_query }}"
-             placeholder="Найти протез по названию или типу…"
-             style="flex:1;padding:13px 18px;border-radius:9px;border:none;
-                    font-size:15px;background:rgba(255,255,255,.18);
-                    color:white;font-family:inherit;backdrop-filter:blur(6px);">
-      <button type="submit" class="btn btn-accent btn-lg"
-              style="white-space:nowrap;padding:13px 26px;border-radius:9px;">
-        🔍 Найти
-      </button>
-    </form>
-  </div>
-</div>
-
-<!-- ═══════════════════════════════════════
-     СЧЁТЧИКИ — aggregate()
-     ═══════════════════════════════════════ -->
-<div class="stats-bar"
-     style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px;">
-
-  <div class="card" style="padding:20px;text-align:center;margin-bottom:0;">
-    <div style="font-size:34px;font-weight:700;color:var(--primary);line-height:1.1;">
-      {{ price_stats.total|default:"0" }}
+        <!-- Быстрые переходы (4 плитки) -->
+        <nav aria-label="Быстрая навигация">
+            <ul role="list"
+                style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem; max-width:30rem; list-style:none; padding:0; margin:0;">
+                <li>
+                    <a href="{% url 'catalog:prosthesis_list' %}"
+                       style="display:flex; align-items:center; justify-content:space-between;
+                              padding:0.875rem 1.125rem; background:var(--bg);
+                              border-radius:var(--radius); text-decoration:none;
+                              color:var(--text); font-weight:600; font-size:0.9375rem;
+                              transition:background 0.15s;">
+                        Каталог протезов
+                        <span aria-hidden="true" style="font-size:1.1rem; color:var(--orange);">→</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'catalog:request_create' %}"
+                       style="display:flex; align-items:center; justify-content:space-between;
+                              padding:0.875rem 1.125rem; background:var(--bg);
+                              border-radius:var(--radius); text-decoration:none;
+                              color:var(--text); font-weight:600; font-size:0.9375rem;
+                              transition:background 0.15s;">
+                        Консультация
+                        <span aria-hidden="true" style="font-size:1.1rem; color:var(--orange);">→</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#compensation"
+                       style="display:flex; align-items:center; justify-content:space-between;
+                              padding:0.875rem 1.125rem; background:var(--bg);
+                              border-radius:var(--radius); text-decoration:none;
+                              color:var(--text); font-weight:600; font-size:0.9375rem;
+                              transition:background 0.15s;">
+                        Способы компенсации
+                        <span aria-hidden="true" style="font-size:1.1rem; color:var(--orange);">→</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'catalog:blogpost_list' %}"
+                       style="display:flex; align-items:center; justify-content:space-between;
+                              padding:0.875rem 1.125rem; background:var(--bg);
+                              border-radius:var(--radius); text-decoration:none;
+                              color:var(--text); font-weight:600; font-size:0.9375rem;
+                              transition:background 0.15s;">
+                        Наш блог
+                        <span aria-hidden="true" style="font-size:1.1rem; color:var(--orange);">→</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
     </div>
-    <div style="font-size:12.5px;color:var(--text-muted);margin-top:5px;">изделий в каталоге</div>
-  </div>
 
-  <div class="card" style="padding:20px;text-align:center;margin-bottom:0;">
-    <div style="font-size:34px;font-weight:700;color:var(--accent);line-height:1.1;">
-      {{ requests_count }}
+    <!-- Иллюстрация (декоративная) -->
+    <div aria-hidden="true"
+         style="background: linear-gradient(135deg, var(--bg) 0%, #A8D8EA 100%);
+                border-radius: var(--radius-lg);
+                height: 22rem;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 8rem;
+                flex-shrink: 0;">
+        🦿
     </div>
-    <div style="font-size:12.5px;color:var(--text-muted);margin-top:5px;">заявок обработано</div>
-  </div>
+</section>
 
-  <div class="card" style="padding:20px;text-align:center;margin-bottom:0;">
-    <div style="font-size:34px;font-weight:700;color:#7B1FA2;line-height:1.1;">
-      {{ published_posts_count }}
-    </div>
-    <div style="font-size:12.5px;color:var(--text-muted);margin-top:5px;">статей в блоге</div>
-  </div>
-
-  <div class="card" style="padding:20px;text-align:center;margin-bottom:0;">
-    {% if price_stats.avg_price %}
-    <div style="font-size:28px;font-weight:700;color:var(--warning);line-height:1.1;">
-      {{ price_stats.avg_price|floatformat:0 }} ₽
-    </div>
-    <div style="font-size:12.5px;color:var(--text-muted);margin-top:5px;">средняя цена</div>
-    {% else %}
-    <div style="font-size:28px;font-weight:700;color:var(--text-muted);line-height:1.1;">—</div>
-    <div style="font-size:12.5px;color:var(--text-muted);margin-top:5px;">средняя цена</div>
-    {% endif %}
-  </div>
-</div>
-
-<!-- ═══════════════════════════════════════
+<!-- ════════════════════════════════════════
      РЕЗУЛЬТАТЫ ПОИСКА
-     ═══════════════════════════════════════ -->
+     ════════════════════════════════════════ -->
 {% if search_query %}
-<div class="card">
-  <div class="card-header">
-    <h2>🔍 Результаты поиска: «{{ search_query }}»</h2>
-    <a href="{% url 'catalog:home' %}" class="see-all">✕ Сбросить</a>
-  </div>
+<section aria-labelledby="search-results-heading">
+    <div class="card">
+        <div class="card-header">
+            <h2 id="search-results-heading">
+                <span aria-hidden="true">🔍</span>
+                Результаты: «{{ search_query }}»
+            </h2>
+            <a href="{% url 'catalog:home' %}" class="see-all"
+               aria-label="Сбросить поиск и вернуться на главную">
+                ✕ Сбросить
+            </a>
+        </div>
 
-  {% if search_results %}
-  <table>
-    <thead>
-      <tr>
-        <th>#</th>
-        <th>Название</th>
-        <th>Тип</th>
-        <th>Цена</th>
-        <th></th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for p in search_results %}
-      <tr>
-        <td style="color:var(--text-muted);font-weight:600;">{{ forloop.counter }}</td>
-        <td>
-          <a href="{{ p.get_absolute_url }}"
-             style="color:var(--primary);font-weight:600;text-decoration:none;">
-            {{ p.name }}
-          </a>
-        </td>
-        <td><span class="badge badge-blue">{{ p.prosthesis_type.name }}</span></td>
-        <td>
-          {% if p.price %}
-          <strong>{{ p.price|floatformat:0 }} ₽</strong>
-          {% else %}
-          <span class="text-muted">по запросу</span>
-          {% endif %}
-        </td>
-        <td>
-          <a href="{{ p.get_absolute_url }}" class="btn btn-outline btn-sm">Подробнее</a>
-        </td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-  {% else %}
-  <div class="empty-state">
-    <span class="icon">🔍</span>
-    <p>По запросу <strong>«{{ search_query }}»</strong> ничего не найдено.</p>
-    <p style="margin-top:8px;font-size:13px;">Попробуйте другое слово или
-      <a href="{% url 'catalog:prosthesis_list' %}" style="color:var(--primary);">просмотрите весь каталог</a>.
-    </p>
-  </div>
-  {% endif %}
-</div>
+        {% if search_results %}
+        <table aria-label="Результаты поиска по каталогу протезов">
+            <thead>
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Название</th>
+                    <th scope="col">Тип</th>
+                    <th scope="col">Цена</th>
+                    <th scope="col"><span class="sr-only">Действия</span></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in search_results %}
+                <tr>
+                    <td style="color:var(--text-muted); font-weight:600;">{{ forloop.counter }}</td>
+                    <td>
+                        <a href="{{ p.get_absolute_url }}"
+                           style="color:var(--primary-dark); font-weight:600; text-decoration:none;">
+                            {{ p.name }}
+                        </a>
+                    </td>
+                    <td><span class="badge badge-teal">{{ p.prosthesis_type.name }}</span></td>
+                    <td>
+                        {% if p.price %}
+                        <strong>{{ p.price|floatformat:0 }} ₽</strong>
+                        {% else %}
+                        <span style="color:var(--text-muted); font-style:italic;">по запросу</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="{{ p.get_absolute_url }}" class="btn btn-outline btn-sm">
+                            Подробнее
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="empty-state" role="status">
+            <span class="icon" aria-hidden="true">🔍</span>
+            <p>По запросу <strong>«{{ search_query }}»</strong> ничего не найдено.</p>
+            <p style="margin-top:0.5rem; font-size:0.875rem;">
+                <a href="{% url 'catalog:prosthesis_list' %}" style="color:var(--primary);">
+                    Просмотреть весь каталог
+                </a>
+            </p>
+        </div>
+        {% endif %}
+    </div>
+</section>
 {% endif %}
 
-<!-- ═══════════════════════════════════════
-     СЕТКА: ВИДЖЕТ 1 + ВИДЖЕТ 2
-     ═══════════════════════════════════════ -->
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:24px;">
+<!-- ════════════════════════════════════════
+     СЧЁТЧИКИ (aggregate: COUNT, AVG)
+     ════════════════════════════════════════ -->
+<section class="stats-bar" aria-label="Статистика центра"
+         style="display:grid; grid-template-columns:repeat(4,1fr); gap:1rem; margin-bottom:1.5rem;">
 
-  <!-- ── ВИДЖЕТ 1: Новинки каталога ─────────────────── -->
-  <div class="card" style="margin-bottom:0;">
-    <div class="card-header">
-      <h2>🦾 Новинки каталога</h2>
-      <a href="{% url 'catalog:prosthesis_list' %}?sort=-created_at" class="see-all">Весь каталог →</a>
-    </div>
+    <article style="background:var(--card-bg); border-radius:var(--radius-lg);
+                    padding:1.25rem; text-align:center; box-shadow:var(--shadow);">
+        <div style="font-size:2.25rem; font-weight:800; color:var(--primary); font-family:'Montserrat',sans-serif; line-height:1.1;">
+            {{ price_stats.total|default:"0" }}
+        </div>
+        <div style="font-size:0.8125rem; color:var(--text-muted); margin-top:0.3125rem;">изделий в каталоге</div>
+    </article>
 
-    {% for p in latest_prostheses %}
-    <div style="display:flex;align-items:center;gap:14px;padding:11px 0;
-                border-bottom:{% if not forloop.last %}1px solid var(--border){% else %}none{% endif %};">
+    <article style="background:var(--card-bg); border-radius:var(--radius-lg);
+                    padding:1.25rem; text-align:center; box-shadow:var(--shadow);">
+        <div style="font-size:2.25rem; font-weight:800; color:var(--orange); font-family:'Montserrat',sans-serif; line-height:1.1;">
+            {{ requests_count }}
+        </div>
+        <div style="font-size:0.8125rem; color:var(--text-muted); margin-top:0.3125rem;">заявок обработано</div>
+    </article>
 
-      <span style="min-width:26px;height:26px;background:var(--bg);border-radius:50%;
-                   display:flex;align-items:center;justify-content:center;
-                   font-size:11px;font-weight:700;color:var(--primary);flex-shrink:0;">
-        {{ forloop.counter }}
-      </span>
+    <article style="background:var(--card-bg); border-radius:var(--radius-lg);
+                    padding:1.25rem; text-align:center; box-shadow:var(--shadow);">
+        <div style="font-size:2.25rem; font-weight:800; color:#7C3AED; font-family:'Montserrat',sans-serif; line-height:1.1;">
+            {{ published_posts_count }}
+        </div>
+        <div style="font-size:0.8125rem; color:var(--text-muted); margin-top:0.3125rem;">статей в блоге</div>
+    </article>
 
-      <div style="flex:1;min-width:0;">
-        <a href="{{ p.get_absolute_url }}"
-           style="font-weight:600;font-size:13.5px;color:var(--text);text-decoration:none;
-                  display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
-          {{ p.name }}
-        </a>
-        <span class="badge badge-blue" style="margin-top:3px;font-size:11px;">
-          {{ p.prosthesis_type.name }}
-        </span>
-      </div>
-
-      <div style="text-align:right;white-space:nowrap;flex-shrink:0;">
-        {% if p.price %}
-        <strong style="font-size:13px;color:var(--primary-dark);">
-          {{ p.price|floatformat:0 }} ₽
-        </strong>
+    <article style="background:var(--card-bg); border-radius:var(--radius-lg);
+                    padding:1.25rem; text-align:center; box-shadow:var(--shadow);">
+        {% if price_stats.avg_price %}
+        <div style="font-size:1.875rem; font-weight:800; color:var(--primary-dark); font-family:'Montserrat',sans-serif; line-height:1.1;">
+            {{ price_stats.avg_price|floatformat:0 }} ₽
+        </div>
         {% else %}
-        <span style="font-size:12px;color:var(--text-muted);">по запросу</span>
+        <div style="font-size:2.25rem; font-weight:800; color:var(--text-muted); line-height:1.1;">—</div>
         {% endif %}
-      </div>
-    </div>
-    {% empty %}
-    <div class="empty-state" style="padding:24px;">
-      <p>Протезы не найдены</p>
-    </div>
-    {% endfor %}
+        <div style="font-size:0.8125rem; color:var(--text-muted); margin-top:0.3125rem;">средняя цена</div>
+    </article>
+</section>
 
-    <div style="margin-top:16px;display:flex;gap:8px;">
-      <a href="{% url 'catalog:prosthesis_list' %}" class="btn btn-outline btn-sm">Каталог</a>
-      <a href="{% url 'catalog:prosthesis_create' %}" class="btn btn-primary btn-sm">+ Добавить</a>
-    </div>
-  </div>
-
-  <!-- ── ВИДЖЕТ 2: Последние новости ────────────────── -->
-  <div class="card" style="margin-bottom:0;">
-    <div class="card-header">
-      <h2>📰 Последние новости</h2>
-      <a href="{% url 'catalog:blogpost_list' %}" class="see-all">Все статьи →</a>
-    </div>
-
-    {% for post in recent_posts %}
-    <div style="padding:12px 0;
-                border-bottom:{% if not forloop.last %}1px solid var(--border){% else %}none{% endif %};">
-      <a href="{% url 'catalog:blogpost_detail' post.pk %}"
-         style="font-weight:600;font-size:14px;color:var(--text);text-decoration:none;
-                display:block;margin-bottom:5px;line-height:1.4;">
-        {{ post.title }}
-      </a>
-      <div style="font-size:12px;color:var(--text-muted);display:flex;gap:14px;margin-bottom:5px;">
-        {% if post.author %}
-        <span>👤 {{ post.author.full_name }}</span>
-        {% endif %}
-        {% if post.published_at %}
-        <span>📅 {{ post.published_at|date:"d.m.Y" }}</span>
-        {% endif %}
-      </div>
-      <p style="font-size:13px;color:var(--text-muted);line-height:1.5;
-                overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">
-        {{ post.content|truncatewords:18 }}
-      </p>
-    </div>
-    {% empty %}
-    <div class="empty-state" style="padding:24px;">
-      <p>Новостей пока нет</p>
-    </div>
-    {% endfor %}
-
-    <div style="margin-top:16px;">
-      <a href="{% url 'catalog:blogpost_list' %}" class="btn btn-outline btn-sm">Все статьи</a>
-    </div>
-  </div>
-
-</div>
-
-<!-- ═══════════════════════════════════════
-     ВИДЖЕТ 3: Ближайшие мероприятия
-     ═══════════════════════════════════════ -->
-<div class="card">
-  <div class="card-header">
-    <h2>📅 Ближайшие мероприятия</h2>
-    <a href="{% url 'catalog:event_list' %}" class="see-all">Все мероприятия →</a>
-  </div>
-
-  {% if upcoming_events %}
-  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px;">
-    {% for event in upcoming_events %}
-    <div style="background:var(--bg);border-radius:10px;padding:16px;
-                border:1.5px solid var(--border);transition:border-color .2s;"
-         onmouseover="this.style.borderColor='var(--primary-light)'"
-         onmouseout="this.style.borderColor='var(--border)'">
-      <div style="display:flex;gap:12px;align-items:flex-start;">
-        <div style="background:var(--primary);color:white;border-radius:9px;
-                    padding:8px 12px;text-align:center;min-width:52px;flex-shrink:0;">
-          <div style="font-size:22px;font-weight:700;line-height:1;">
-            {{ event.event_date|date:"d" }}
-          </div>
-          <div style="font-size:11px;text-transform:uppercase;letter-spacing:.04em;">
-            {{ event.event_date|date:"M" }}
-          </div>
+<!-- ════════════════════════════════════════
+     ВИДЖЕТ 1: КАТАЛОГ ПО ТИПАМ (annotate)
+     ════════════════════════════════════════ -->
+<section aria-labelledby="types-heading">
+    <div class="card">
+        <div class="card-header">
+            <h2 id="types-heading">Протезы нашей фирмы</h2>
+            <a href="{% url 'catalog:prosthesis_list' %}" class="see-all">Весь каталог →</a>
         </div>
-        <div style="flex:1;min-width:0;">
-          <a href="{% url 'catalog:event_detail' event.pk %}"
-             style="font-weight:600;font-size:13.5px;color:var(--text);
-                    text-decoration:none;display:block;line-height:1.35;margin-bottom:6px;">
-            {{ event.title }}
-          </a>
-          {% if event.location %}
-          <div style="font-size:12px;color:var(--text-muted);">
-            📍 {{ event.location }}
-          </div>
-          {% endif %}
-          {% if event.website %}
-          <a href="{{ event.website }}" target="_blank"
-             style="font-size:12px;color:var(--accent);text-decoration:none;margin-top:4px;display:inline-block;">
-            🔗 Сайт
-          </a>
-          {% endif %}
-        </div>
-      </div>
+        <p style="font-size:0.9375rem; color:var(--text-muted); margin-bottom:1.25rem;">
+            Изготавливаем и помогаем получить современные протезы
+            людям с врождёнными особенностями и ампутациями
+        </p>
+
+        <ul role="list"
+            style="display:grid; grid-template-columns:repeat(auto-fill, minmax(10rem, 1fr));
+                   gap:1rem; list-style:none; padding:0; margin:0;">
+            {% for t in types_by_count %}
+            <li>
+                <a href="{% url 'catalog:prosthesis_list' %}?type={{ t.pk }}"
+                   style="display:flex; flex-direction:column; align-items:center;
+                          gap:0.75rem; padding:1.25rem 1rem;
+                          background:var(--bg); border-radius:var(--radius-lg);
+                          text-decoration:none; color:var(--text);
+                          font-weight:600; font-size:0.875rem; text-align:center;
+                          transition:background 0.15s, box-shadow 0.15s;"
+                   aria-label="{{ t.name }}: {{ t.count }} изделий">
+                    <span aria-hidden="true" style="font-size:2.5rem; line-height:1;">🦾</span>
+                    <span>{{ t.name }}</span>
+                    <span class="badge badge-teal">{{ t.count }} шт.</span>
+                </a>
+            </li>
+            {% empty %}
+            <li style="grid-column:1/-1;">
+                <p class="empty-state"><span class="icon" aria-hidden="true">📋</span>Типы не найдены</p>
+            </li>
+            {% endfor %}
+        </ul>
     </div>
-    {% endfor %}
-  </div>
-  {% else %}
-  <div class="empty-state">
-    <span class="icon">📅</span>
-    <p>Ближайших мероприятий нет</p>
-  </div>
-  {% endif %}
+</section>
 
-  <div style="margin-top:16px;">
-    <a href="{% url 'catalog:event_list' %}" class="btn btn-outline btn-sm">Все мероприятия</a>
-  </div>
+<!-- ════════════════════════════════════════
+     ВИДЖЕТ 1+2: НОВИНКИ + НОВОСТИ
+     ════════════════════════════════════════ -->
+<div style="display:grid; grid-template-columns:1fr 1fr; gap:1.5rem; margin-bottom:1.5rem;">
+
+    <!-- Новинки каталога -->
+    <section aria-labelledby="latest-heading" class="card" style="margin-bottom:0;">
+        <div class="card-header">
+            <h2 id="latest-heading">🦾 Новинки каталога</h2>
+            <a href="{% url 'catalog:prosthesis_list' %}?sort=-created_at" class="see-all">Весь каталог →</a>
+        </div>
+
+        <ol style="list-style:none; padding:0; margin:0;" aria-label="Список последних добавленных протезов">
+            {% for p in latest_prostheses %}
+            <li style="display:flex; align-items:center; gap:0.875rem; padding:0.75rem 0;
+                       border-bottom:{% if not forloop.last %}1px solid var(--bg){% else %}none{% endif %};">
+                <span aria-hidden="true"
+                      style="min-width:1.625rem; height:1.625rem; background:var(--bg);
+                             border-radius:50%; display:flex; align-items:center;
+                             justify-content:center; font-size:0.6875rem;
+                             font-weight:700; color:var(--primary); flex-shrink:0;">
+                    {{ forloop.counter }}
+                </span>
+                <div style="flex:1; min-width:0;">
+                    <a href="{{ p.get_absolute_url }}"
+                       style="font-weight:600; font-size:0.9rem; color:var(--text);
+                              text-decoration:none; display:block;
+                              white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                        {{ p.name }}
+                    </a>
+                    <span class="badge badge-teal" style="margin-top:0.25rem; font-size:0.6875rem;">
+                        {{ p.prosthesis_type.name }}
+                    </span>
+                </div>
+                <div style="text-align:right; white-space:nowrap; flex-shrink:0;">
+                    {% if p.price %}
+                    <strong style="font-size:0.875rem; color:var(--primary-dark);">
+                        {{ p.price|floatformat:0 }} ₽
+                    </strong>
+                    {% else %}
+                    <span style="font-size:0.8125rem; color:var(--text-muted); font-style:italic;">по запросу</span>
+                    {% endif %}
+                </div>
+            </li>
+            {% empty %}
+            <li>
+                <p class="empty-state" style="padding:1.5rem;">Протезов пока нет</p>
+            </li>
+            {% endfor %}
+        </ol>
+
+        <div style="margin-top:1rem; display:flex; gap:0.5rem;">
+            <a href="{% url 'catalog:prosthesis_list' %}" class="btn btn-outline btn-sm">Каталог</a>
+            <a href="{% url 'catalog:prosthesis_create' %}" class="btn btn-primary btn-sm no-print">+ Добавить</a>
+        </div>
+    </section>
+
+    <!-- Последние новости -->
+    <section aria-labelledby="blog-heading" class="card" style="margin-bottom:0;">
+        <div class="card-header">
+            <h2 id="blog-heading">📰 Последние новости</h2>
+            <a href="{% url 'catalog:blogpost_list' %}" class="see-all">Все статьи →</a>
+        </div>
+
+        <ul style="list-style:none; padding:0; margin:0;" aria-label="Последние статьи блога">
+            {% for post in recent_posts %}
+            <li style="padding:0.75rem 0;
+                       border-bottom:{% if not forloop.last %}1px solid var(--bg){% else %}none{% endif %};">
+                <a href="{% url 'catalog:blogpost_detail' post.pk %}"
+                   style="font-weight:600; font-size:0.9375rem; color:var(--text);
+                          text-decoration:none; display:block; margin-bottom:0.3125rem; line-height:1.4;">
+                    {{ post.title }}
+                </a>
+                <div style="font-size:0.75rem; color:var(--text-muted); display:flex; gap:0.875rem; margin-bottom:0.3125rem;">
+                    {% if post.author %}
+                    <span>
+                        <span aria-hidden="true">👤</span>
+                        {{ post.author.full_name }}
+                    </span>
+                    {% endif %}
+                    {% if post.published_at %}
+                    <time datetime="{{ post.published_at|date:'Y-m-d' }}">
+                        <span aria-hidden="true">📅</span>
+                        {{ post.published_at|date:"d.m.Y" }}
+                    </time>
+                    {% endif %}
+                </div>
+                <p style="font-size:0.8125rem; color:var(--text-muted); line-height:1.5;
+                          overflow:hidden; display:-webkit-box;
+                          -webkit-line-clamp:2; -webkit-box-orient:vertical;">
+                    {{ post.content|truncatewords:18 }}
+                </p>
+            </li>
+            {% empty %}
+            <li>
+                <p class="empty-state" style="padding:1.5rem;">Новостей пока нет</p>
+            </li>
+            {% endfor %}
+        </ul>
+
+        <div style="margin-top:1rem;">
+            <a href="{% url 'catalog:blogpost_list' %}" class="btn btn-outline btn-sm">Все статьи</a>
+        </div>
+    </section>
 </div>
 
-<!-- ═══════════════════════════════════════
-     БЫСТРЫЙ ПЕРЕХОД ПО ТИПАМ (annotate)
-     ═══════════════════════════════════════ -->
-<div class="card">
-  <div class="card-header">
-    <h2>📋 Каталог по типам</h2>
-    <a href="{% url 'catalog:prosthesis_list' %}" class="see-all">Смотреть всё →</a>
-  </div>
-  <div style="display:flex;gap:10px;flex-wrap:wrap;">
-    {% for t in types_by_count %}
-    <a href="{% url 'catalog:prosthesis_list' %}?type={{ t.pk }}"
-       style="display:inline-flex;align-items:center;gap:10px;padding:11px 18px;
-              background:var(--bg);border-radius:9px;text-decoration:none;
-              color:var(--text);border:1.5px solid var(--border);
-              transition:all .2s;font-size:13.5px;font-weight:500;"
-       onmouseover="this.style.borderColor='var(--primary)';this.style.color='var(--primary)'"
-       onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text)'">
-      {{ t.name }}
-      <span class="badge badge-blue">{{ t.count }}</span>
-    </a>
-    {% empty %}
-    <p class="text-muted">Типы протезов не найдены</p>
-    {% endfor %}
-  </div>
-</div>
+<!-- ════════════════════════════════════════
+     ВИДЖЕТ 3: БЛИЖАЙШИЕ МЕРОПРИЯТИЯ
+     ════════════════════════════════════════ -->
+<section aria-labelledby="events-heading">
+    <div class="card">
+        <div class="card-header">
+            <h2 id="events-heading">📅 Ближайшие мероприятия</h2>
+            <a href="{% url 'catalog:event_list' %}" class="see-all">Все мероприятия →</a>
+        </div>
+
+        {% if upcoming_events %}
+        <ul role="list"
+            style="display:grid; grid-template-columns:repeat(auto-fill, minmax(14rem,1fr));
+                   gap:0.875rem; list-style:none; padding:0; margin:0;">
+            {% for event in upcoming_events %}
+            <li>
+                <article style="background:var(--bg); border-radius:var(--radius); padding:1rem;">
+                    <div style="display:flex; gap:0.75rem; align-items:flex-start;">
+                        <div aria-hidden="true"
+                             style="background:var(--primary); color:white;
+                                    border-radius:var(--radius-sm); padding:0.5rem 0.75rem;
+                                    text-align:center; min-width:3.25rem; flex-shrink:0;">
+                            <div style="font-size:1.375rem; font-weight:800; line-height:1; font-family:'Montserrat',sans-serif;">
+                                {{ event.event_date|date:"d" }}
+                            </div>
+                            <div style="font-size:0.6875rem; text-transform:uppercase; letter-spacing:.03em;">
+                                {{ event.event_date|date:"M" }}
+                            </div>
+                        </div>
+                        <div style="flex:1;">
+                            <a href="{% url 'catalog:event_detail' event.pk %}"
+                               style="font-weight:600; font-size:0.9rem; color:var(--text);
+                                      text-decoration:none; display:block; line-height:1.35; margin-bottom:0.375rem;">
+                                {{ event.title }}
+                            </a>
+                            {% if event.location %}
+                            <p style="font-size:0.75rem; color:var(--text-muted);">
+                                <span aria-hidden="true">📍</span>
+                                {{ event.location }}
+                            </p>
+                            {% endif %}
+                            <time datetime="{{ event.event_date|date:'Y-m-d' }}" class="sr-only">
+                                {{ event.event_date|date:"d MMMM Y" }}
+                            </time>
+                        </div>
+                    </div>
+                </article>
+            </li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <div class="empty-state" role="status">
+            <span class="icon" aria-hidden="true">📅</span>
+            <p>Ближайших мероприятий нет</p>
+        </div>
+        {% endif %}
+
+        <div style="margin-top:1rem;">
+            <a href="{% url 'catalog:event_list' %}" class="btn btn-outline btn-sm">Все мероприятия</a>
+        </div>
+    </div>
+</section>
+
+<!-- ════════════════════════════════════════
+     КОМПЕНСАЦИЯ ПО ГОСПРОГРАММЕ (статичная секция)
+     ════════════════════════════════════════ -->
+<section aria-labelledby="comp-heading" id="compensation">
+    <div class="card">
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:2rem; align-items:start;">
+
+            <div>
+                <h2 id="comp-heading"
+                    style="font-family:'Montserrat',sans-serif; font-size:1.625rem;
+                           font-weight:800; text-transform:uppercase;
+                           color:var(--primary-dark); margin-bottom:1.25rem;">
+                    Компенсация по<br>госпрограмме
+                </h2>
+
+                <div style="background:var(--bg); border-radius:var(--radius); padding:1.125rem; margin-bottom:0.875rem;">
+                    <h3 style="font-weight:700; font-size:1rem; margin-bottom:0.5rem;">Государственный контракт</h3>
+                    <ul style="font-size:0.875rem; color:var(--text-muted); padding-left:1rem; line-height:1.8;">
+                        <li>ожидание от 2 до 12 месяцев</li>
+                        <li>государственные контракты на обеспечение ТСР организуются пропорционально потребности граждан</li>
+                    </ul>
+                </div>
+
+                <div style="background:var(--bg); border-radius:var(--radius); padding:1.125rem;">
+                    <h3 style="font-weight:700; font-size:1rem; margin-bottom:0.5rem;">Электронный сертификат</h3>
+                    <ul style="font-size:0.875rem; color:var(--text-muted); padding-left:1rem; line-height:1.8;">
+                        <li>ожидание до 2-х месяцев</li>
+                        <li>сумма сертификата зависит от региона</li>
+                        <li>срок действия электронного сертификата больше года</li>
+                    </ul>
+                </div>
+
+                <div style="margin-top:1.25rem;">
+                    <a href="{% url 'catalog:request_create' %}" class="btn btn-primary">
+                        Оставить заявку
+                    </a>
+                </div>
+            </div>
+
+            <!-- Декоративная иллюстрация -->
+            <div aria-hidden="true"
+                 style="background: linear-gradient(135deg, var(--bg), #A8D8EA);
+                        border-radius:var(--radius-lg); height:16rem;
+                        display:flex; align-items:center; justify-content:center;
+                        font-size:6rem;">
+                🏥
+            </div>
+        </div>
+    </div>
+</section>
 
 {% endblock %}

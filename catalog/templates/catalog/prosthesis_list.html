@@ -84,22 +84,24 @@
      ───────────────────────────────────────── -->
 {% if prostheses %}
 <section aria-label="Список протезов">
-    <ul role="list"
+    <ul role="list" class="prosthesis-grid"
         style="display:grid; grid-template-columns:repeat(auto-fill, minmax(22rem, 1fr));
                gap:1.25rem; list-style:none; padding:0; margin:0;">
 
         {% for p in prostheses %}
-        <li>
-            <article style="background:var(--card-bg); border-radius:var(--radius-lg);
+        <li style="display:flex;">
+            <article class="prosthesis-card"
+                     style="background:var(--card-bg); border-radius:var(--radius-lg);
                             box-shadow:var(--shadow); overflow:hidden;
                             border: 1.5px solid var(--border);
-                            display:flex; flex-direction:column;">
+                            display:flex; flex-direction:column; width:100%;">
 
-                <!-- Верхняя часть: текст + изображение -->
-                <div style="display:flex; gap:1rem; padding:1.375rem 1.375rem 0; align-items:flex-start;">
+                <!-- Верхняя часть: текст + изображение; растягивается чтобы вытолкнуть блок характеристик вниз -->
+                <div style="display:flex; gap:1rem; padding:1.375rem 1.375rem 0;
+                            align-items:flex-start; flex:1;">
 
-                    <div style="flex:1; min-width:0;">
-                        <!-- Имя (bold uppercase, как MANIFESTO FINGERS) -->
+                    <div style="flex:1; min-width:0; display:flex; flex-direction:column;">
+                        <!-- Тип (bold uppercase) -->
                         <p style="font-family:'Montserrat',sans-serif; font-size:0.75rem;
                                   font-weight:800; text-transform:uppercase;
                                   letter-spacing:.08em; color:var(--primary-dark); margin-bottom:0.25rem;">
@@ -116,17 +118,19 @@
 
                         {% if p.description %}
                         <p style="font-size:0.8125rem; color:var(--text-muted); line-height:1.55;
-                                  margin-bottom:0.875rem;
+                                  margin-bottom:0.875rem; flex:1;
                                   overflow:hidden; display:-webkit-box;
                                   -webkit-line-clamp:3; -webkit-box-orient:vertical;">
                             {{ p.description }}
                         </p>
+                        {% else %}
+                        <div style="flex:1;"></div>
                         {% endif %}
 
                         <!-- Кнопка Подробнее -->
                         <a href="{{ p.get_absolute_url }}"
-                           class="btn btn-primary btn-sm"
-                           style="margin-bottom:0.75rem;">
+                           class="btn btn-primary btn-sm no-print"
+                           style="margin-bottom:0.75rem; align-self:flex-start;">
                             Подробнее
                         </a>
                     </div>
@@ -136,7 +140,7 @@
                         {% if p.image %}
                         <img src="{{ p.image.url }}"
                              alt="{{ p.name }}"
-                             style="width:100%; height:100%; object-fit:cover; border-radius:var(--radius);">
+                             style="width:100%; height:100%; object-fit:contain; border-radius:var(--radius);">
                         {% else %}
                         <div aria-hidden="true"
                              style="width:100%; height:100%; background:var(--bg);

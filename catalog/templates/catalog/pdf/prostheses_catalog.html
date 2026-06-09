@@ -1,0 +1,67 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<style>
+  body { font-family: DejaVu Sans, Arial, sans-serif; font-size: 11px; color: #222; margin: 40px; }
+  h1 { font-size: 20px; color: #1a5f7a; margin-bottom: 4px; }
+  .meta { color: #666; font-size: 10px; margin-bottom: 20px; }
+  table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+  th { background: #1a5f7a; color: #fff; padding: 7px 8px; text-align: left; font-size: 10px; }
+  td { padding: 6px 8px; border-bottom: 1px solid #e0e0e0; vertical-align: top; }
+  tr:nth-child(even) td { background: #f5fafc; }
+  .price { font-weight: bold; color: #1a5f7a; }
+  .noprice { color: #aaa; font-style: italic; }
+  .desc { color: #555; font-size: 10px; }
+  .active-yes { color: #28a745; font-weight: bold; }
+  .active-no  { color: #dc3545; font-weight: bold; }
+  .footer { margin-top: 30px; font-size: 9px; color: #aaa; text-align: right; }
+</style>
+</head>
+<body>
+
+<h1>АвангардПротез — Каталог протезов</h1>
+<div class="meta">Сформирован: {{ generated_at }} &nbsp;|&nbsp; Позиций в отчёте: {{ prostheses|length }}</div>
+
+<table>
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>Название</th>
+      <th>Тип</th>
+      <th>Цена (руб.)</th>
+      <th>Описание</th>
+      <th>Активен</th>
+      <th>Добавлен</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for p in prostheses %}
+    <tr>
+      <td>{{ p.pk }}</td>
+      <td><strong>{{ p.name }}</strong></td>
+      <td>{{ p.prosthesis_type.name }}</td>
+      <td>
+        {% if p.price %}
+          <span class="price">{{ p.price|floatformat:0 }}</span>
+        {% else %}
+          <span class="noprice">по запросу</span>
+        {% endif %}
+      </td>
+      <td class="desc">{{ p.description|default:"—"|truncatechars:80 }}</td>
+      <td>
+        {% if p.is_active %}
+          <span class="active-yes">Да</span>
+        {% else %}
+          <span class="active-no">Нет</span>
+        {% endif %}
+      </td>
+      <td>{{ p.created_at|date:"d.m.Y" }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<div class="footer">АвангардПротез © {{ generated_at|slice:":4" }}</div>
+</body>
+</html>

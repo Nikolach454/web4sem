@@ -14,6 +14,7 @@ views.py — демонстрация всех требуемых возможн
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import Http404
 from django.db.models import Avg, Count, Max, Min, Sum, Q
+from django.db.models.functions import Lower
 from django.utils import timezone
 from datetime import timedelta
 
@@ -41,13 +42,20 @@ def home(request):
     search_results = None
     if search_query:
         # filter() + Q() + __icontains + select_related
+        # Lower() — обходим ограничение SQLite: LIKE не работает с кириллицей без него
+        q = search_query.lower()
         search_results = (
             Prosthesis.active
             .select_related('prosthesis_type')
+            .annotate(
+                name_lower=Lower('name'),
+                description_lower=Lower('description'),
+                type_lower=Lower('prosthesis_type__name'),
+            )
             .filter(
-                Q(name__icontains=search_query) |
-                Q(description__icontains=search_query) |
-                Q(prosthesis_type__name__icontains=search_query)
+                Q(name_lower__contains=q) |
+                Q(description_lower__contains=q) |
+                Q(type_lower__contains=q)
             )
             .order_by('name')
         )
@@ -132,9 +140,13 @@ def prosthesis_list(request):
     # __icontains — поиск без учёта регистра (Часть 4)
     search = request.GET.get('q', '').strip()
     if search:
-        qs = qs.filter(
-            Q(name__icontains=search) |                          # поиск по имени
-            Q(prosthesis_type__name__icontains=search)           # __ к связанной таблице
+        q = search.lower()
+        qs = qs.annotate(
+            name_lower=Lower('name'),
+            type_lower=Lower('prosthesis_type__name'),
+        ).filter(
+            Q(name_lower__contains=q) |                          # поиск по имени
+            Q(type_lower__contains=q)                            # __ к связанной таблице
         )
 
     # __contains — поиск с учётом регистра (Часть 4)

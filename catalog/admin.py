@@ -1,6 +1,6 @@
-import io
 from django.contrib import admin
-from django.http import FileResponse
+from django.http import HttpResponse
+from django.utils import timezone
 from django.utils.html import format_html
 
 from .models import (
@@ -29,83 +29,163 @@ def mark_in_progress(modeladmin, request, queryset):
 @admin.action(description='Сгенерировать PDF-отчёт по выбранным заявкам')
 def export_requests_pdf(modeladmin, request, queryset):
     """
-    Демонстрация: генерация PDF в админке (Часть 3, стр. 488 учебника).
-    Использует библиотеку reportlab.
-    Установка: pip install reportlab
+    Демонстрация: генерация PDF через ReportLab (Часть 3, стр. 488 учебника).
+    Шрифт Arial (Windows) подключается через TTFont — поддержка кириллицы.
     """
-    try:
-        from reportlab.pdfgen import canvas
-        from reportlab.lib.pagesizes import A4
-        from reportlab.pdfbase import pdfmetrics
-        from reportlab.pdfbase.ttfonts import TTFont
-        import os
+    import io
+    from reportlab.pdfgen import canvas
+    from reportlab.lib.pagesizes import A4
+    from reportlab.pdfbase import pdfmetrics
+    from reportlab.pdfbase.ttfonts import TTFont
 
-        buffer = io.BytesIO()
-        p = canvas.Canvas(buffer, pagesize=A4)
-        width, height = A4
+    pdfmetrics.registerFont(TTFont('Arial', 'C:/Windows/Fonts/arial.ttf'))
+    pdfmetrics.registerFont(TTFont('Arial-Bold', 'C:/Windows/Fonts/arialbd.ttf'))
 
-        p.setFont('Helvetica-Bold', 14)
-        p.drawString(50, height - 50, 'Request Report')
-        p.setFont('Helvetica', 10)
+    buffer = io.BytesIO()
+    p = canvas.Canvas(buffer, pagesize=A4)
+    width, height = A4
 
-        y = height - 80
-        for req in queryset:
+    # Заголовок
+    p.setFont('Arial-Bold', 16)
+    p.setFillColorRGB(0, 0, 0)
+    p.drawString(50, height - 50, 'АвангардПротез — Отчёт по заявкам')
+
+    p.setFont('Arial', 9)
+    p.setFillColorRGB(0, 0, 0)
+    generated = timezone.now().strftime('%d.%m.%Y %H:%M')
+    p.drawString(50, height - 68, f'Сформирован: {generated}  |  Заявок в отчёте: {queryset.count()}')
+
+    # Шапка таблицы
+    y = height - 95
+    p.setFillColorRGB(0, 0, 0)
+    p.rect(50, y - 4, width - 100, 18, fill=1, stroke=0)
+    p.setFillColorRGB(1, 1, 1)
+    p.setFont('Arial-Bold', 9)
+    p.drawString(55, y + 2, '#')
+    p.drawString(75, y + 2, 'Тип')
+    p.drawString(165, y + 2, 'Контакт')
+    p.drawString(295, y + 2, 'Email')
+    p.drawString(415, y + 2, 'Статус')
+    p.drawString(490, y + 2, 'Дата')
+    y -= 20
+
+    qs = queryset.select_related('status', 'prosthesis', 'user')
+    for i, req in enumerate(qs):
+        if y < 60:
+            p.showPage()
+            y = height - 50
+
+        # Чередование строк
+        if i % 2 == 0:
+            p.setFillColorRGB(0.9, 0.9, 0.9)
+            p.rect(50, y - 4, width - 100, 16, fill=1, stroke=0)
+
+        p.setFillColorRGB(0, 0, 0)
+        p.setFont('Arial', 8)
+        p.drawString(55, y + 2, str(req.pk))
+        p.drawString(75, y + 2, req.get_request_type_display()[:12])
+        p.drawString(165, y + 2, req.contact_name[:16])
+        p.drawString(295, y + 2, req.contact_email[:18])
+        p.drawString(415, y + 2, (req.status.name if req.status else '—')[:10])
+        p.drawString(490, y + 2, req.created_at.strftime('%d.%m.%Y'))
+        y -= 18
+
+        # Сообщение (если есть)
+        if req.message:
             if y < 60:
                 p.showPage()
                 y = height - 50
-            line = f'#{req.pk} | {req.request_type} | {req.contact_name} | {req.contact_email}'
-            p.drawString(50, y, line[:90])
-            y -= 18
+            p.setFont('Arial', 7)
+            p.setFillColorRGB(0, 0, 0)
+            p.drawString(75, y + 2, f'  {req.message[:90]}')
+            y -= 14
 
-        p.save()
-        buffer.seek(0)
-        return FileResponse(buffer, as_attachment=True, filename='requests_report.pdf')
-
-    except ImportError:
-        modeladmin.message_user(
-            request,
-            'Установите reportlab: pip install reportlab',
-            level='error',
-        )
+    p.save()
+    buffer.seek(0)
+    response = HttpResponse(buffer, content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename="requests_report.pdf"'
+    return response
 
 
 @admin.action(description='Сгенерировать PDF-каталог выбранных протезов')
 def export_prostheses_pdf(modeladmin, request, queryset):
     """
-    Демонстрация: генерация PDF (Часть 3).
+    Демонстрация: генерация PDF через ReportLab (Часть 3).
+    Шрифт Arial (Windows) подключается через TTFont — поддержка кириллицы.
     """
-    try:
-        from reportlab.pdfgen import canvas
-        from reportlab.lib.pagesizes import A4
+    import io
+    from reportlab.pdfgen import canvas
+    from reportlab.lib.pagesizes import A4
+    from reportlab.pdfbase import pdfmetrics
+    from reportlab.pdfbase.ttfonts import TTFont
 
-        buffer = io.BytesIO()
-        p = canvas.Canvas(buffer, pagesize=A4)
-        width, height = A4
+    pdfmetrics.registerFont(TTFont('Arial', 'C:/Windows/Fonts/arial.ttf'))
+    pdfmetrics.registerFont(TTFont('Arial-Bold', 'C:/Windows/Fonts/arialbd.ttf'))
 
-        p.setFont('Helvetica-Bold', 16)
-        p.drawString(50, height - 50, 'Prosthesis Catalog')
-        p.setFont('Helvetica', 10)
+    buffer = io.BytesIO()
+    p = canvas.Canvas(buffer, pagesize=A4)
+    width, height = A4
 
-        y = height - 80
-        for pr in queryset.select_related('prosthesis_type'):
+    # Заголовок
+    p.setFont('Arial-Bold', 16)
+    p.setFillColorRGB(0, 0, 0)
+    p.drawString(50, height - 50, 'АвангардПротез — Каталог протезов')
+
+    p.setFont('Arial', 9)
+    p.setFillColorRGB(0, 0, 0)
+    generated = timezone.now().strftime('%d.%m.%Y %H:%M')
+    p.drawString(50, height - 68, f'Сформирован: {generated}  |  Позиций в отчёте: {queryset.count()}')
+
+    # Шапка таблицы
+    y = height - 95
+    p.setFillColorRGB(0, 0, 0)
+    p.rect(50, y - 4, width - 100, 18, fill=1, stroke=0)
+    p.setFillColorRGB(1, 1, 1)
+    p.setFont('Arial-Bold', 9)
+    p.drawString(55, y + 2, '#')
+    p.drawString(75, y + 2, 'Название')
+    p.drawString(235, y + 2, 'Тип')
+    p.drawString(335, y + 2, 'Цена (руб.)')
+    p.drawString(425, y + 2, 'Активен')
+    p.drawString(490, y + 2, 'Добавлен')
+    y -= 20
+
+    qs = queryset.select_related('prosthesis_type')
+    for i, pr in enumerate(qs):
+        if y < 60:
+            p.showPage()
+            y = height - 50
+
+        if i % 2 == 0:
+            p.setFillColorRGB(0.9, 0.9, 0.9)
+            p.rect(50, y - 4, width - 100, 16, fill=1, stroke=0)
+
+        p.setFillColorRGB(0, 0, 0)
+        p.setFont('Arial', 8)
+        p.drawString(55, y + 2, str(pr.pk))
+        p.drawString(75, y + 2, pr.name[:22])
+        p.drawString(235, y + 2, pr.prosthesis_type.name[:14])
+        price_str = f'{pr.price:,.0f}' if pr.price else 'по запросу'
+        p.drawString(335, y + 2, price_str)
+        p.drawString(425, y + 2, 'Да' if pr.is_active else 'Нет')
+        p.drawString(490, y + 2, pr.created_at.strftime('%d.%m.%Y'))
+        y -= 18
+
+        # Описание (если есть)
+        if pr.description:
             if y < 60:
                 p.showPage()
                 y = height - 50
-            price = f'{pr.price} rub.' if pr.price else 'no price'
-            line = f'{pr.name} | {pr.prosthesis_type.name} | {price}'
-            p.drawString(50, y, line[:90])
-            y -= 18
+            p.setFont('Arial', 7)
+            p.setFillColorRGB(0, 0, 0)
+            p.drawString(75, y + 2, pr.description[:95])
+            y -= 14
 
-        p.save()
-        buffer.seek(0)
-        return FileResponse(buffer, as_attachment=True, filename='prostheses_catalog.pdf')
-
-    except ImportError:
-        modeladmin.message_user(
-            request,
-            'Установите reportlab: pip install reportlab',
-            level='error',
-        )
+    p.save()
+    buffer.seek(0)
+    response = HttpResponse(buffer, content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename="prostheses_catalog.pdf"'
+    return response
 
 
 # ──────────────────────────────────────────────
